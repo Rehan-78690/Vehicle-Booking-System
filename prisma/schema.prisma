@@ -1,0 +1,18 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+   url      = env("DATABASE_URL")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model vehicles {
+  id                 Int     @id @default(autoincrement())
+  name               String
+  type               String
+  category           String?
+  passenger_capacity Int
+  suitcase_capacity  Int
+}
