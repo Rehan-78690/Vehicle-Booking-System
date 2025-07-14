@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import VehicleSelector from '../components/VehicleSelector';
+import QuoteDisplay from '@/components/QuoteDisplay';
 
 export default function HomePage() {
   const [formData, setFormData] = useState({
@@ -75,6 +76,8 @@ export default function HomePage() {
           <div className="text-sm mt-1">
             (Passengers: {selectedVehicle.passengerCapacity}, Suitcases: {selectedVehicle.suitcaseCapacity})
           </div>
+          <h1>"Test"</h1>
+          <QuoteDisplay />
         </div>
       )}
     </main>
