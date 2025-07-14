@@ -2,30 +2,49 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({
-    totalQuotes: 0,
+    totalQuotes: 1240,
     totalVehicles: 0,
-    todayQuotes: 0,
-    revenue: 0
+    todayQuotes: 22,
+    revenue: 284000
   });
 
-  // Mock data - replace with actual API calls
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
-    setStats({
-      totalQuotes: 156,
-      totalVehicles: 12,
-      todayQuotes: 8,
-      revenue: 45600
-    });
+    const fetchVehicles = async () => {
+      try {
+        const res = await fetch('/api/vehicles');
+        if (!res.ok) throw new Error('Failed to fetch vehicles');
+        const vehicles = await res.json();
+        setStats(prev => ({
+          ...prev,
+          totalVehicles: vehicles.length || 0
+        }));
+      } catch (err) {
+        console.error('Vehicle fetch error:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchVehicles();
   }, []);
 
   const quickActions = [
-    { name: 'Add Vehicle', href: '/admin/vehicles/add', icon: '🚗', color: 'bg-blue-500' },
-    { name: 'View Quotes', href: '/admin/quotes', icon: '📋', color: 'bg-green-500' },
-    { name: 'Update Pricing', href: '/admin/pricing', icon: '💰', color: 'bg-yellow-500' },
-    { name: 'Settings', href: '/admin/settings', icon: '⚙️', color: 'bg-purple-500' },
+    { name: 'Add Vehicle', href: '/admin/vehicles/add', icon: '/icons/vehicles.png', color: 'bg-blue-100' },
+    { name: 'View Quotes', href: '/admin/quotes', icon: '/icons/quotes.png', color: 'bg-green-100' },
+    { name: 'Update Pricing', href: '/admin/pricing', icon: '/icons/price.png', color: 'bg-yellow-100' },
+    { name: 'Settings', href: '/admin/settings', icon: '/icons/settings.png', color: 'bg-purple-100' },
+  ];
+
+  const statIcons = [
+    { icon: '/icons/quotes.png', bg: 'bg-blue-100', text: 'text-blue-600', label: 'Total Quotes', value: stats.totalQuotes },
+    { icon: '/icons/vehicles.png', bg: 'bg-green-100', text: 'text-green-600', label: 'Total Vehicles', value: stats.totalVehicles },
+    { icon: '/icons/calendar.png', bg: 'bg-yellow-100', text: 'text-yellow-600', label: "Today's Quotes", value: stats.todayQuotes },
+    { icon: '/icons/price.png', bg: 'bg-purple-100', text: 'text-purple-600', label: 'Total Revenue', value: `₹${stats.revenue.toLocaleString()}` },
   ];
 
   const recentQuotes = [
@@ -35,107 +54,67 @@ export default function AdminDashboard() {
   ];
 
   return (
-    <div className="space-y-6">
-      {/* Page Header */}
-      <div className="border-b border-gray-200 pb-4">
-        <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-        <p className="mt-2 text-gray-600">Welcome to the Transport Quotation Admin Panel</p>
-      </div>
-
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <div className="w-8 h-8 bg-blue-100 rounded-md flex items-center justify-center">
-                <span className="text-blue-600 text-lg">📊</span>
-              </div>
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Total Quotes</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.totalQuotes}</p>
-            </div>
-          </div>
+      <div className="space-y-6">
+        {/* Page Header */}
+        <div className="border-b border-gray-200 pb-4">
+          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+          <p className="mt-2 text-gray-600">Welcome to the Transport Quotation Admin Panel</p>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <div className="w-8 h-8 bg-green-100 rounded-md flex items-center justify-center">
-                <span className="text-green-600 text-lg">🚗</span>
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {statIcons.map((item, idx) => (
+              <div key={idx} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <div className="flex items-center">
+                  <div className="flex-shrink-0">
+                    <div className={`w-8 h-8 ${item.bg} rounded-md flex items-center justify-center`}>
+                      <Image src={item.icon} alt={item.label} width={20} height={20} />
+                    </div>
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-600">{item.label}</p>
+                    <p className="text-2xl font-bold text-gray-900">{item.value}</p>
+                  </div>
+                </div>
               </div>
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Total Vehicles</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.totalVehicles}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <div className="w-8 h-8 bg-yellow-100 rounded-md flex items-center justify-center">
-                <span className="text-yellow-600 text-lg">📅</span>
-              </div>
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Today&#39;s Quotes</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.todayQuotes}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <div className="w-8 h-8 bg-purple-100 rounded-md flex items-center justify-center">
-                <span className="text-purple-600 text-lg">💰</span>
-              </div>
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Total Revenue</p>
-              <p className="text-2xl font-bold text-gray-900">₹{stats.revenue.toLocaleString()}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Quick Actions */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {quickActions.map((action) => (
-            <Link
-              key={action.name}
-              href={action.href}
-              className="flex flex-col items-center p-4 rounded-lg border border-gray-200 hover:border-gray-300 hover:shadow-md transition-all duration-200"
-            >
-              <div className={`w-12 h-12 ${action.color} rounded-lg flex items-center justify-center mb-3`}>
-                <span className="text-white text-xl">{action.icon}</span>
-              </div>
-              <span className="text-sm font-medium text-gray-700">{action.name}</span>
-            </Link>
           ))}
         </div>
-      </div>
 
-      {/* Recent Quotes */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-900">Recent Quotes</h2>
-            <Link 
-              href="/admin/quotes"
-              className="text-sm text-blue-600 hover:text-blue-800 font-medium"
-            >
-              View all →
-            </Link>
+        {/* Quick Actions */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {quickActions.map((action) => (
+                <Link
+                    key={action.name}
+                    href={action.href}
+                    className="flex flex-col items-center p-4 rounded-lg border border-gray-200 hover:border-gray-300 hover:shadow-md transition-all duration-200"
+                >
+                  <div className={`w-12 h-12 ${action.color} rounded-lg flex items-center justify-center mb-3`}>
+                    <Image src={action.icon} alt={action.name} width={34} height={34} />
+                  </div>
+                  <span className="text-sm font-medium text-gray-700">{action.name}</span>
+                </Link>
+            ))}
           </div>
         </div>
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+
+        {/* Recent Quotes */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+          <div className="px-6 py-4 border-b border-gray-200">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-gray-900">Recent Quotes</h2>
+              <Link
+                  href="/admin/quotes"
+                  className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+              >
+                View all →
+              </Link>
+            </div>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Customer
@@ -150,35 +129,34 @@ export default function AdminDashboard() {
                   Status
                 </th>
               </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
               {recentQuotes.map((quote) => (
-                <tr key={quote.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {quote.customer}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {quote.route}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    ₹{quote.amount.toLocaleString()}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <tr key={quote.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      {quote.customer}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {quote.route}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      ₹{quote.amount.toLocaleString()}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                      quote.status === 'Completed' ? 'bg-green-100 text-green-800' :
-                      quote.status === 'Confirmed' ? 'bg-blue-100 text-blue-800' :
-                      'bg-yellow-100 text-yellow-800'
+                        quote.status === 'Completed' ? 'bg-green-100 text-green-800' :
+                            quote.status === 'Confirmed' ? 'bg-blue-100 text-blue-800' :
+                                'bg-yellow-100 text-yellow-800'
                     }`}>
                       {quote.status}
                     </span>
-                  </td>
-                </tr>
+                    </td>
+                  </tr>
               ))}
-            </tbody>
-          </table>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
-    </div>
   );
 }
-

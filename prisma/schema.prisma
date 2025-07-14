@@ -4,10 +4,9 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-   url      = env("DATABASE_URL")
+  url      = env("DATABASE_URL")
 }
 
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model vehicles {
   id                 Int     @id @default(autoincrement())
   name               String
@@ -15,4 +14,18 @@ model vehicles {
   category           String?
   passenger_capacity Int
   suitcase_capacity  Int
+}
+
+model pricing {
+  id                Int      @id @default(autoincrement())
+  vehicle_type      String   @db.VarChar(50)
+  destination_category String? @db.VarChar(20)
+  rate_per_km       Float?
+  rate_per_hour     Float?
+  rate_per_day      Float?
+  condition         String?  @db.VarChar(50)
+  adjustment        Float?
+  created_at        DateTime @default(now())
+
+  @@unique([vehicle_type, destination_category])
 }
