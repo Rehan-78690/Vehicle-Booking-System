@@ -1,9 +1,10 @@
-// components/DayExcursionForm.js
+// components/IntercityTransferForm.js
 'use client';
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
+// Reuse the same europeanCities and vehicleOptions from previous forms
 const europeanCities = {
   'Paris, France': {},
   'Rome, Italy': {},
@@ -108,59 +109,42 @@ const vehicleOptions = [
   { id: 16, type: '77-Seater (Double-Decker)', category: 'Bus', capacity: '76 passengers, 60 suitcases', maxPassengers: 76, maxLuggage: 60 }
 ];
 
-export default function DayExcursionForm({ onSubmit }) {
+export default function IntercityTransferForm({ onSubmit }) {
   const [formData, setFormData] = useState({
-    city: '',
     date: '',
-    pickupTime: '10:00',
-    hours: 4,
+    pickupCity: '',
+    hours: 1,
     travelers: 1,
-    visitedCities: [''],
-    distance: 0,
-    vehicleType: ''
+    luggage: 1,
+    vehicleType: '',
+    dropoffCity: '',
+    distance: 0
   });
   const [suggestedVehicles, setSuggestedVehicles] = useState([]);
 
   // Vehicle suggestion logic
   useEffect(() => {
     const filtered = vehicleOptions.filter(
-      vehicle => vehicle.maxPassengers >= formData.travelers
+      vehicle => vehicle.maxPassengers >= formData.travelers && 
+                vehicle.maxLuggage >= formData.luggage
     );
     setSuggestedVehicles(filtered);
     if (filtered.length > 0 && !formData.vehicleType) {
       setFormData(prev => ({ ...prev, vehicleType: filtered[0].type }));
     }
-  }, [formData.travelers]);
+  }, [formData.travelers, formData.luggage]);
+
+  // Mock distance calculation when cities are selected
+  useEffect(() => {
+    if (formData.pickupCity && formData.dropoffCity) {
+      const mockDistance = Math.floor(Math.random() * 500) + 50;
+      setFormData(prev => ({ ...prev, distance: mockDistance }));
+    }
+  }, [formData.pickupCity, formData.dropoffCity]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleCityChange = (index, value) => {
-    const newCities = [...formData.visitedCities];
-    newCities[index] = value;
-    setFormData(prev => ({ ...prev, visitedCities: newCities }));
-    
-    // Mock distance calculation (replace with Google Maps API call)
-    if (formData.city && value) {
-      const mockDistance = Math.floor(Math.random() * 200) + 20;
-      setFormData(prev => ({ ...prev, distance: mockDistance }));
-    }
-  };
-
-  const addCity = () => {
-    setFormData(prev => ({
-      ...prev,
-      visitedCities: [...prev.visitedCities, '']
-    }));
-  };
-
-  const removeCity = (index) => {
-    if (formData.visitedCities.length > 1) {
-      const newCities = formData.visitedCities.filter((_, i) => i !== index);
-      setFormData(prev => ({ ...prev, visitedCities: newCities }));
-    }
   };
 
   const handleSubmit = (e) => {
@@ -178,31 +162,14 @@ export default function DayExcursionForm({ onSubmit }) {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
           </Link>
-          <h1 className="text-2xl font-bold text-center">Day Excursion</h1>
+          <h1 className="text-2xl font-bold text-center">Intercity Transfer with Disposal</h1>
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          {/* City of Service */}
-          <div>
-            <label className="block text-sm font-medium mb-1">City of Service</label>
-            <select
-              name="city"
-              value={formData.city}
-              onChange={handleInputChange}
-              className="w-full border border-gray-300 rounded-md p-2"
-              required
-            >
-              <option value="">Select City</option>
-              {Object.keys(europeanCities).map(city => (
-                <option key={city} value={city}>{city}</option>
-              ))}
-            </select>
-          </div>
-
-          {/* Date and Time */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Date and Cities */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-1">Date of Service</label>
+              <label className="block text-sm font-medium mb-1">Date</label>
               <input
                 type="date"
                 name="date"
@@ -214,26 +181,53 @@ export default function DayExcursionForm({ onSubmit }) {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Pickup Time</label>
-              <input
-                type="time"
-                name="pickupTime"
-                value={formData.pickupTime}
+              <label className="block text-sm font-medium mb-1">Pickup City</label>
+              <select
+                name="pickupCity"
+                value={formData.pickupCity}
                 onChange={handleInputChange}
                 className="w-full border border-gray-300 rounded-md p-2"
-              />
+                required
+              >
+                <option value="">Select City</option>
+                {Object.keys(europeanCities).map(city => (
+                  <option key={city} value={city}>{city}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Dropping City</label>
+              <select
+                name="dropoffCity"
+                value={formData.dropoffCity}
+                onChange={handleInputChange}
+                className="w-full border border-gray-300 rounded-md p-2"
+                required
+              >
+                <option value="">Select City</option>
+                {Object.keys(europeanCities).map(city => (
+                  <option key={city} value={city}>{city}</option>
+                ))}
+              </select>
             </div>
           </div>
 
-          {/* Duration and Travelers */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Distance Display */}
+          {formData.distance > 0 && (
+            <div className="text-right">
+              <span className="text-sm font-medium">Estimated Distance: </span>
+              <span className="text-sm">{formData.distance} KM</span>
+            </div>
+          )}
+
+          {/* Hours and Passengers */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-1">Total Duration (Hours)</label>
+              <label className="block text-sm font-medium mb-1">No. of Hours</label>
               <input
                 type="number"
                 name="hours"
                 min="1"
-                max="16"
                 value={formData.hours}
                 onChange={handleInputChange}
                 className="w-full border border-gray-300 rounded-md p-2"
@@ -241,7 +235,7 @@ export default function DayExcursionForm({ onSubmit }) {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Number of Travelers</label>
+              <label className="block text-sm font-medium mb-1">No. of Travellers</label>
               <input
                 type="number"
                 name="travelers"
@@ -252,50 +246,18 @@ export default function DayExcursionForm({ onSubmit }) {
                 required
               />
             </div>
-          </div>
-
-          {/* Visited Cities */}
-          <div className="space-y-4">
-            <label className="block text-sm font-medium mb-1">Cities Visited</label>
-            {formData.visitedCities.map((city, index) => (
-              <div key={index} className="flex gap-2 items-end">
-                <input
-                  type="text"
-                  value={city}
-                  onChange={(e) => handleCityChange(index, e.target.value)}
-                  className="flex-1 border border-gray-300 rounded-md p-2"
-                  placeholder="Enter city name"
-                  required
-                />
-                {formData.visitedCities.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => removeCity(index)}
-                    className="text-red-500 hover:text-red-700 p-2"
-                  >
-                    ×
-                  </button>
-                )}
-              </div>
-            ))}
-            <button
-              type="button"
-              onClick={addCity}
-              className="text-[#27368c] hover:text-[#1a2a6b] font-medium flex items-center"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
-              </svg>
-              Add City
-            </button>
-            
-            {/* Distance Display */}
-            {formData.distance > 0 && (
-              <div className="mt-2">
-                <span className="text-sm font-medium">Distance: </span>
-                <span className="text-sm">{formData.distance} KM</span>
-              </div>
-            )}
+            <div>
+              <label className="block text-sm font-medium mb-1">No. of Luggages</label>
+              <input
+                type="number"
+                name="luggage"
+                min="0"
+                value={formData.luggage}
+                onChange={handleInputChange}
+                className="w-full border border-gray-300 rounded-md p-2"
+                required
+              />
+            </div>
           </div>
 
           {/* Vehicle Selection */}

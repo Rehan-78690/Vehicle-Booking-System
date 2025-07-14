@@ -1,8 +1,9 @@
-// app/multi-day/page.js
+// Disposal form
+// app/hourly-disposal/page.js
 'use client';
 
 import { useRouter } from 'next/navigation';
-import MultiDayForm from '@/components/MultiDayForm';
+import HourlyDisposalForm from '@/components/HourlyDisposalForm';
 
 export default function Page() {
   const router = useRouter();
@@ -13,5 +14,5 @@ export default function Page() {
     router.push('/confirmation');
   };
 
-  return <MultiDayForm onSubmit={handleSubmit} />;
+  return <HourlyDisposalForm onSubmit={handleSubmit} />;
 }
