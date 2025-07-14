@@ -5,21 +5,33 @@ import Link from 'next/link';
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({
-    totalQuotes: 0,
+    totalQuotes: 1240,        // Placeholder, fetch from DB later
     totalVehicles: 0,
-    todayQuotes: 0,
-    revenue: 0
+    todayQuotes: 22,          // Placeholder
+    revenue: 284000           // Placeholder
   });
 
-  // Mock data - replace with actual API calls
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
-    setStats({
-      totalQuotes: 156,
-      totalVehicles: 12,
-      todayQuotes: 8,
-      revenue: 45600
-    });
+    const fetchVehicles = async () => {
+      try {
+        const res = await fetch('/api/vehicles');
+        if (!res.ok) throw new Error('Failed to fetch vehicles');
+        const vehicles = await res.json();
+        setStats(prev => ({
+          ...prev,
+          totalVehicles: vehicles.length || 0
+        }));
+      } catch (err) {
+        console.error('Vehicle fetch error:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchVehicles();
   }, []);
+
 
   const quickActions = [
     { name: 'Add Vehicle', href: '/admin/vehicles/add', icon: '🚗', color: 'bg-blue-500' },
