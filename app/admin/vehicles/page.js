@@ -231,9 +231,10 @@ export default function VehiclesPage() {
                       Delete Vehicle
                     </h3>
                     <div className="mt-2">
-                      <p className="text-sm text-gray-500">
-                        Are you sure you want to delete "{vehicleToDelete?.name}"? This action cannot be undone.
-                      </p>
+                     <p className="text-sm text-gray-500">
+  Are you sure you want to delete &quot;{vehicleToDelete?.name}&quot;? This action cannot be undone.
+</p>
+
                     </div>
                   </div>
                 </div>
