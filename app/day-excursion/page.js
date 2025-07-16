@@ -7,17 +7,30 @@ import DayExcursionForm from '@/components/DayExcursionForm';
 export default function Page() {
   const router = useRouter();
 
-  const handleSubmit = (formData) => {
-    console.log('Form data:', formData);
-    // Here you would call your API to submit the form data
-    // For example:
-    // await fetch('/api/day-excursion', {
-    //   method: 'POST',
-    //   body: JSON.stringify(formData)
-    // });
-    
-    // Then navigate to confirmation page
-    router.push('/confirmation');
+  const handleSubmit = async (formData) => {
+    try {
+      // Send to API route
+      const response = await fetch('/api/quotes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          use_case_type: 'day-excursion',
+          form_data: formData
+        })
+      });
+
+      const result = await response.json();
+      
+      if (response.ok) {
+        router.push(`/confirmation?id=${result.id}`);
+      } else {
+        console.error('Quote creation failed:', result.error);
+        alert('Failed to create quote. Please try again.');
+      }
+    } catch (error) {
+      console.error('Submission error:', error);
+      alert('An error occurred. Please try again.');
+    }
   };
 
   return (
