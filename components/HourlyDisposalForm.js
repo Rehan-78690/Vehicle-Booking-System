@@ -120,7 +120,7 @@ export default function HourlyDisposalForm({ onSubmit }) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
+    <div className="min-h-screen bg-gray-50 ">
       <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-md overflow-hidden">
         {/* Header with Back Button */}
         <div className="bg-[#27368c] p-6 text-white relative">

@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-
+import FormLayout from './FormLayout';
 const europeanCities = {
   'Paris, France': {},
   'Rome, Italy': {},
@@ -198,7 +198,8 @@ export default function MultiDayForm({ onSubmit }) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
+    <FormLayout>
+    <div className="min-h-screen bg-gray-50 ">
       <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md overflow-hidden">
         {/* Header with Back Button */}
         <div className="bg-[#27368c] p-6 text-white relative">
@@ -366,5 +367,5 @@ export default function MultiDayForm({ onSubmit }) {
         </form>
       </div>
     </div>
-  );
+  </FormLayout>);
 }

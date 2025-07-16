@@ -1,6 +1,6 @@
 // components/DayExcursionForm.js
 'use client';
-
+import FormLayout from './FormLayout';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
@@ -168,8 +168,9 @@ export default function DayExcursionForm({ onSubmit }) {
     onSubmit(formData);
   };
 
-  return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
+return (
+  <FormLayout>
+    <div className="min-h-screen bg-gray-50 ">
       <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-md overflow-hidden">
         {/* Header with Back Button */}
         <div className="bg-[#27368c] p-6 text-white relative">
@@ -328,5 +329,5 @@ export default function DayExcursionForm({ onSubmit }) {
         </form>
       </div>
     </div>
-  );
-}
+   </FormLayout>);
+}    

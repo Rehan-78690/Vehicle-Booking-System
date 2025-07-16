@@ -3,7 +3,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-
+import FormLayout from '@/components/FormLayout';
 export default function QuotationPage() {
   const router = useRouter();
   const [selectedOption, setSelectedOption] = useState('');
@@ -15,7 +15,8 @@ export default function QuotationPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+  <FormLayout>
+    <div className=" bg-gray-50 flex items-center justify-center">
       <div className="w-full max-w-md bg-white rounded-lg shadow-md overflow-hidden">
         <div className="bg-[#27368c] p-6 text-white">
           <h1 className="text-2xl font-bold uppercase tracking-wider">TRANSPORT</h1>
@@ -61,5 +62,5 @@ export default function QuotationPage() {
         </form>
       </div>
     </div>
-  );
+    </FormLayout>);
 }
