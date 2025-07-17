@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import prisma from '@/lib/prisma';
 
 export default function AddVehiclePage() {
   const router = useRouter();
@@ -78,27 +79,35 @@ export default function AddVehiclePage() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    if (!validateForm()) return;
+  e.preventDefault();
 
-    setIsSubmitting(true);
-    
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Here you would make the actual API call to save the vehicle
-      console.log('Vehicle data to save:', formData);
-      
-      // Redirect to vehicles list
-      router.push('/admin/vehicles');
-    } catch (error) {
-      console.error('Error saving vehicle:', error);
-    } finally {
-      setIsSubmitting(false);
+  if (!validateForm()) return;
+
+  setIsSubmitting(true);
+
+  try {
+    const res = await fetch('/api/vehicles', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(formData)
+    });
+
+    if (!res.ok) {
+      throw new Error('Failed to create vehicle');
     }
-  };
+
+    const data = await res.json();
+    console.log('Vehicle created:', data);
+
+    router.push('/admin/vehicles');
+  } catch (error) {
+    console.error('Error saving vehicle:', error);
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">

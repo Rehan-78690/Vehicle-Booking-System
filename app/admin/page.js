@@ -5,14 +5,59 @@ import Link from 'next/link';
 import Image from 'next/image';
 
 export default function AdminDashboard() {
-  const [stats, setStats] = useState({
-    totalQuotes: 1240,
-    totalVehicles: 0,
-    todayQuotes: 22,
-    revenue: 284000
-  });
+  const [quotes, setQuotes] = useState([]);
+const [pricing, setPricing] = useState([]);
+ const [stats, setStats] = useState({
+  totalQuotes: 0,
+  totalVehicles: 0,
+  todayQuotes: 0,
+  revenue: 0
+});
 
   const [loading, setLoading] = useState(true);
+useEffect(() => {
+  
+  const fetchDashboardData = async () => {
+    try {
+      const quotesRes = await fetch('/api/quotes');
+      if (!quotesRes.ok) throw new Error('Failed to fetch quotes');
+      const quotesData = await quotesRes.json();
+
+      const enrichedQuotes = quotesData
+        .map((quote, index) => {
+          const form = JSON.parse(quote.formData || '{}');
+          return {
+            ...quote,
+            customer: form.name || 'Unknown',
+            route: `${form.pickup_location || '—'} to ${form.dropoff_location || '—'}`,
+            status: quote.status || 'Pending',
+          };
+        })
+        .slice(-3) // latest 3
+        .reverse();
+
+      const pricingRes = await fetch('/api/pricing');
+      if (!pricingRes.ok) throw new Error('Failed to fetch pricing');
+      const pricingData = await pricingRes.json();
+
+      setStats(prev => ({
+        ...prev,
+        totalQuotes: quotesData.length || 0,
+        todayQuotes: quotesData.filter(q => new Date(q.createdAt).toDateString() === new Date().toDateString()).length,
+        revenue: quotesData.reduce((acc, q) => acc + (q.price || 0), 0)
+      }));
+
+      setQuotes(enrichedQuotes);
+      setPricing(pricingData);
+    } catch (err) {
+      console.error('Dashboard API fetch error:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchDashboardData();
+}, []);
 
   useEffect(() => {
     const fetchVehicles = async () => {
@@ -47,11 +92,31 @@ export default function AdminDashboard() {
     { icon: '/icons/price.png', bg: 'bg-purple-100', text: 'text-purple-600', label: 'Total Revenue', value: `₹${stats.revenue.toLocaleString()}` },
   ];
 
-  const recentQuotes = [
-    { id: 1, customer: 'John Doe', route: 'Mumbai to Pune', amount: 2500, status: 'Pending' },
-    { id: 2, customer: 'Jane Smith', route: 'Delhi to Agra', amount: 3200, status: 'Confirmed' },
-    { id: 3, customer: 'Mike Johnson', route: 'Bangalore to Mysore', amount: 1800, status: 'Completed' },
-  ];
+ 
+   {quotes.map((quote) => (
+  <tr key={quote.id}>
+    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+      {quote.customerName || 'Unknown'}
+    </td>
+    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+      {quote.route || `${quote.pickup} to ${quote.dropoff}`}
+    </td>
+    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+      ₹{quote.amount?.toLocaleString() || quote.price?.toLocaleString() || 0}
+    </td>
+    <td className="px-6 py-4 whitespace-nowrap">
+      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+        quote.status === 'Completed' ? 'bg-green-100 text-green-800' :
+        quote.status === 'Confirmed' ? 'bg-blue-100 text-blue-800' :
+        'bg-yellow-100 text-yellow-800'
+      }`}>
+        {quote.status || 'Pending'}
+      </span>
+    </td>
+  </tr>
+))}
+
+ 
 
   return (
       <div className="space-y-6">
@@ -131,7 +196,7 @@ export default function AdminDashboard() {
               </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-              {recentQuotes.map((quote) => (
+              {quotes.map((quote) => (
                   <tr key={quote.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                       {quote.customer}
@@ -140,7 +205,8 @@ export default function AdminDashboard() {
                       {quote.route}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      ₹{quote.amount.toLocaleString()}
+                      ₹₹{(quote.price ?? 0).toLocaleString()}
+
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${

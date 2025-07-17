@@ -17,79 +17,43 @@ export default function QuotesPage() {
 
   // Mock data - replace with actual API calls
   useEffect(() => {
-    const mockQuotes = [
-      {
-        id: 'Q001',
-        customerName: 'John Doe',
-        customerEmail: 'john@example.com',
-        customerPhone: '+91 9876543210',
-        serviceType: 'One Way',
-        fromLocation: 'Mumbai',
-        toLocation: 'Pune',
-        vehicleType: 'Sedan',
-        passengers: 4,
-        luggage: 2,
-        distance: 150,
-        amount: 2250,
-        status: 'Pending',
-        createdAt: '2024-01-15T10:30:00Z',
-        validUntil: '2024-01-22T10:30:00Z'
-      },
-      {
-        id: 'Q002',
-        customerName: 'Jane Smith',
-        customerEmail: 'jane@example.com',
-        customerPhone: '+91 9876543211',
-        serviceType: 'Round Trip',
-        fromLocation: 'Delhi',
-        toLocation: 'Agra',
-        vehicleType: 'SUV',
-        passengers: 6,
-        luggage: 4,
-        distance: 420,
-        amount: 4200,
-        status: 'Confirmed',
-        createdAt: '2024-01-14T14:20:00Z',
-        validUntil: '2024-01-21T14:20:00Z'
-      },
-      {
-        id: 'Q003',
-        customerName: 'Mike Johnson',
-        customerEmail: 'mike@example.com',
-        customerPhone: '+91 9876543212',
-        serviceType: 'Multi Day',
-        fromLocation: 'Bangalore',
-        toLocation: 'Mysore',
-        vehicleType: 'Tempo Traveller',
-        passengers: 12,
-        luggage: 8,
-        distance: 300,
-        amount: 8500,
-        status: 'Completed',
-        createdAt: '2024-01-13T09:15:00Z',
-        validUntil: '2024-01-20T09:15:00Z'
-      },
-      {
-        id: 'Q004',
-        customerName: 'Sarah Wilson',
-        customerEmail: 'sarah@example.com',
-        customerPhone: '+91 9876543213',
-        serviceType: 'Disposal',
-        fromLocation: 'Chennai',
-        toLocation: 'Local',
-        vehicleType: 'Sedan',
-        passengers: 3,
-        luggage: 1,
-        distance: 80,
-        amount: 1800,
-        status: 'Expired',
-        createdAt: '2024-01-10T16:45:00Z',
-        validUntil: '2024-01-17T16:45:00Z'
-      }
-    ];
-    setQuotes(mockQuotes);
-    setFilteredQuotes(mockQuotes);
-  }, []);
+  const fetchQuotes = async () => {
+    try {
+      const res = await fetch('/api/quotes');
+      if (!res.ok) throw new Error('Failed to fetch quotes');
+      const data = await res.json();
+
+      // Parse formData if needed
+      const enhancedQuotes = data.map((quote, i) => {
+        const form = JSON.parse(quote.formData || '{}');
+        return {
+          id: `Q${(i + 1).toString().padStart(3, '0')}`,
+          customerName: form.name || 'Unknown',
+          customerEmail: form.email || '',
+          customerPhone: form.phone || '',
+          serviceType: quote.useCase || '',
+          fromLocation: form.pickup_location || '—',
+          toLocation: form.dropoff_location || '—',
+          vehicleType: quote.vehicleType || '',
+          passengers: form.passengers || 0,
+          luggage: form.luggage || 0,
+          distance: form.distance || 0,
+          amount: quote.price || 0,
+          status: 'Pending', // You can update this if you store status
+          createdAt: quote.createdAt,
+          validUntil: quote.validUntil || quote.createdAt
+        };
+      });
+
+      setQuotes(enhancedQuotes);
+      setFilteredQuotes(enhancedQuotes);
+    } catch (err) {
+      console.error('Failed to fetch quotes:', err);
+    }
+  };
+
+  fetchQuotes();
+}, []);
 
   // Filter quotes based on current filters
   useEffect(() => {
