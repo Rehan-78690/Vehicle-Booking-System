@@ -16,7 +16,7 @@ export default function QuoteConfirmation() {
     // Fetch the latest quote from your API
     const fetchQuote = async () => {
       try {
-        const response = await GET('/api/quotes');
+        const response = await fetch('/api/quotes');
         const data = await response.json();
         setQuote(data);
       } catch (error) {
@@ -62,7 +62,8 @@ export default function QuoteConfirmation() {
     doc.setFont(undefined, 'bold');
     doc.text('Total Price:', 15, 70);
     doc.setFont(undefined, 'normal');
-    doc.text(`€${quote.price.toFixed(2)}`, 50, 70);
+   doc.text(`€${typeof quote.price === 'number' ? quote.price.toFixed(2) : 'N/A'}`, 50, 70);
+
     
     // Date
     doc.setFont(undefined, 'bold');
@@ -76,7 +77,14 @@ export default function QuoteConfirmation() {
     doc.setFont(undefined, 'normal');
     
     let yPosition = 100;
-    const formData = JSON.parse(quote.formData);
+    let formData = {};
+try {
+  formData = typeof quote.formData === 'string' ? JSON.parse(quote.formData) : quote.formData || {};
+} catch (err) {
+  console.error('Invalid formData in quote:', quote.formData);
+  formData = {};
+}
+
     
     Object.entries(formData).forEach(([key, value]) => {
       if (value && typeof value === 'string') {
@@ -125,7 +133,14 @@ export default function QuoteConfirmation() {
     );
   }
 
-  const formData = JSON.parse(quote.formData);
+  let formData = {};
+try {
+  formData = typeof quote.formData === 'string' ? JSON.parse(quote.formData) : quote.formData || {};
+} catch (err) {
+  console.error('Invalid formData in quote:', quote.formData);
+  formData = {};
+}
+
 
   return (
     <FormLayout>
@@ -133,7 +148,10 @@ export default function QuoteConfirmation() {
         {/* Confirmation Header */}
         <div className="bg-[#27368c] p-6 text-white">
           <h1 className="text-2xl font-bold text-center">Your Transport Quote</h1>
-          <p className="text-center opacity-90 mt-1">Reference #QT-{quote.id.toString().padStart(5, '0')}</p>
+         <p className="text-center opacity-90 mt-1">
+  Reference #QT-{quote?.id?.toString()?.padStart(5, '0') || '00000'}
+</p>
+
         </div>
 
         {/* Quote Details */}
@@ -324,8 +342,9 @@ export default function QuoteConfirmation() {
                 <p className="text-sm text-gray-600">Inclusive of all taxes</p>
               </div>
               <div className="text-2xl font-bold text-[#b82025]">
-                €{quote.price.toFixed(2)}
-              </div>
+  €{typeof quote.price === 'number' ? quote.price.toFixed(2) : 'N/A'}
+</div>
+
             </div>
           </div>
 
