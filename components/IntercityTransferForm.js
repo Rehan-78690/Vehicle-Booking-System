@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import FormLayout from './FormLayout';
 
 // Reuse the same europeanCities and vehicleOptions from previous forms
 const europeanCities = {
@@ -152,12 +153,14 @@ export default function IntercityTransferForm({ onSubmit }) {
     onSubmit(formData);
   };
 
-  return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
+return (
+
+  <FormLayout>
+    <div className="min-h-screen bg-gray-50 ">
       <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-md overflow-hidden">
         {/* Header with Back Button */}
-        <div className="bg-[#27368c] p-6 text-white relative">
-          <Link href="/quotation" className="absolute left-6 top-6 text-white hover:text-gray-200">
+        <div className="bg-[#27368c] p-4  text-white relative">
+          <Link href="/quotation" className="absolute left-3 top-5 text-white hover:text-gray-200">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
@@ -290,5 +293,5 @@ export default function IntercityTransferForm({ onSubmit }) {
         </form>
       </div>
     </div>
-  );
+  </FormLayout>);
 }

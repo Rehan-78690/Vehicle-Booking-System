@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-
+import FormLayout from './FormLayout';
 const europeanCities = {
   'Paris, France': {
     pickups: ['CDG Airport', 'Orly Airport', 'Gare du Nord', 'Gare de Lyon', 'Hotel Le Bristol'],
@@ -160,7 +160,8 @@ const handleSubmit = (e) => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
+    
+    <div className="min-h-screen bg-gray-50 ">
       <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-md overflow-hidden">
         {/* Header with Back Button */}
         <div className="bg-[#27368c] p-6 text-white relative">

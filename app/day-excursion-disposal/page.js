@@ -3,6 +3,7 @@
 
 import { useRouter } from 'next/navigation';
 import IntercityTransferForm from '@/components/IntercityTransferForm';
+import FormLayout from '@/components/FormLayout';
 
 export default function Page() {
   const router = useRouter();
@@ -18,5 +19,7 @@ export default function Page() {
     router.push('/confirmation');
   };
 
-  return <IntercityTransferForm onSubmit={handleSubmit} />;
+  return(
+  <IntercityTransferForm onSubmit={handleSubmit} />);
+ 
 }

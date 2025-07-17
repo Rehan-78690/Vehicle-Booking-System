@@ -1,10 +1,8 @@
 'use client';
 
 import OneWayForm from '@/components/OneWayForm';
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-
-export default function OneWayPage() {
+import FormLayout from '@/components/FormLayout';
+export default function Page() {
   const router = useRouter();
 
   const [quoteResult, setQuoteResult] = useState(null);

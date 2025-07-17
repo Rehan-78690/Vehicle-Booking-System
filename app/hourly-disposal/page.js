@@ -4,7 +4,7 @@
 
 import { useRouter } from 'next/navigation';
 import HourlyDisposalForm from '@/components/HourlyDisposalForm';
-
+import FormLayout from '@/components/FormLayout';
 export default function Page() {
   const router = useRouter();
 
@@ -14,5 +14,12 @@ export default function Page() {
     router.push('/confirmation');
   };
 
-  return <HourlyDisposalForm onSubmit={handleSubmit} />;
+  //  <HourlyDisposalForm onSubmit={handleSubmit} />
+     
+     return(
+     <FormLayout>
+       <HourlyDisposalForm onSubmit={handleSubmit} />
+     </FormLayout>
+
+  );
 }

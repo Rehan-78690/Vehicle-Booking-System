@@ -3,7 +3,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-
+import FormLayout from './FormLayout';
 export default function FormRadio() {
   const router = useRouter();
   const [selectedOption, setSelectedOption] = useState('');
@@ -28,7 +28,8 @@ export default function FormRadio() {
     router.push(routes[selectedOption]);
   };
 
-  return (
+return (
+  <FormLayout>
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md bg-white rounded-lg shadow-md overflow-hidden">
         {/* Header */}
@@ -85,5 +86,5 @@ export default function FormRadio() {
         </form>
       </div>
     </div>
-  );
+  </FormLayout>);
 }
