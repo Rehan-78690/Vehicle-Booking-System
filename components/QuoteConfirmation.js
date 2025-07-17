@@ -16,7 +16,7 @@ export default function QuoteConfirmation() {
     // Fetch the latest quote from your API
     const fetchQuote = async () => {
       try {
-        const response = await fetch('/api/quotes/latest');
+        const response = await GET('/api/quotes');
         const data = await response.json();
         setQuote(data);
       } catch (error) {
@@ -212,8 +212,108 @@ export default function QuoteConfirmation() {
                 </div>
               </div>
             )}
+            {quote.useCase === 'Intercity Transfer with Disposal' && (
+  <div className="space-y-3">
+    <div className="flex justify-between border-b pb-2">
+      <span className="font-medium">Pickup City:</span>
+      <span>{formData.pickupCity}</span>
+    </div>
+    <div className="flex justify-between border-b pb-2">
+      <span className="font-medium">Dropping City:</span>
+      <span>{formData.dropoffCity}</span>
+    </div>
+    <div className="flex justify-between border-b pb-2">
+      <span className="font-medium">Date:</span>
+      <span>{formData.date}</span>
+    </div>
+    <div className="flex justify-between border-b pb-2">
+      <span className="font-medium">Hours:</span>
+      <span>{formData.hours}</span>
+    </div>
+  </div>
+)}
 
-            {/* Add similar blocks for other use cases */}
+{quote.useCase === 'Multi-City Multi-Day Disposal' && (
+  <div className="space-y-4">
+    <h4 className="font-medium text-[#27368c]">Itinerary</h4>
+    {formData.itinerary?.map((day, index) => (
+      <div key={index} className="border rounded-lg p-3">
+        <div className="flex justify-between font-medium">
+          <span>Day {day.dayNumber}</span>
+          <span>{day.date}</span>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">
+          <div>
+            <span className="text-sm text-gray-600">Overnight City:</span>
+            <p>{day.city}</p>
+          </div>
+          <div>
+            <span className="text-sm text-gray-600">Service Type:</span>
+            <p>{day.serviceType}</p>
+          </div>
+        </div>
+      </div>
+    ))}
+    <div className="flex justify-between border-b pb-2">
+      <span className="font-medium">Pickup Location:</span>
+      <span>{formData.pickupLocation}</span>
+    </div>
+    <div className="flex justify-between border-b pb-2">
+      <span className="font-medium">Final Drop-off:</span>
+      <span>{formData.dropoffLocation}</span>
+    </div>
+  </div>
+)}
+
+{quote.useCase === 'Day Excursion' && (
+  <div className="space-y-3">
+    <div className="flex justify-between border-b pb-2">
+      <span className="font-medium">City of Service:</span>
+      <span>{formData.city}</span>
+    </div>
+    <div className="flex justify-between border-b pb-2">
+      <span className="font-medium">Date:</span>
+      <span>{formData.date}</span>
+    </div>
+    <div className="flex justify-between border-b pb-2">
+      <span className="font-medium">Pickup Time:</span>
+      <span>{formData.pickupTime}</span>
+    </div>
+    <div className="flex justify-between border-b pb-2">
+      <span className="font-medium">Duration:</span>
+      <span>{formData.hours} hours</span>
+    </div>
+    <div className="flex justify-between border-b pb-2">
+      <span className="font-medium">Cities Visited:</span>
+      <span>
+        {formData.visitedCities?.filter(c => c).join(', ') || '-'}
+      </span>
+    </div>
+    <div className="flex justify-between border-b pb-2">
+      <span className="font-medium">Distance:</span>
+      <span>{formData.distance} KM</span>
+    </div>
+  </div>
+)}
+
+{quote.useCase === 'Hourly Disposal' && (
+  <div className="space-y-3">
+    <div className="flex justify-between border-b pb-2">
+      <span className="font-medium">City:</span>
+      <span>{formData.city}</span>
+    </div>
+    <div className="flex justify-between border-b pb-2">
+      <span className="font-medium">Date:</span>
+      <span>{formData.date}</span>
+    </div>
+    <div className="flex justify-between border-b pb-2">
+      <span className="font-medium">Hours:</span>
+      <span>{formData.hours}</span>
+    </div>
+  </div>
+)}
+
+           
           </div>
 
           {/* Price Summary */}

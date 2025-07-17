@@ -17,18 +17,19 @@ model vehicles {
 }
 
 model pricing {
-  id                Int      @id @default(autoincrement())
-  vehicle_type      String   @db.VarChar(50)
-  destination_category String? @db.VarChar(20)
-  rate_per_km       Float?
-  rate_per_hour     Float?
-  rate_per_day      Float?
-  condition         String?  @db.VarChar(50)
-  adjustment        Float?
-  created_at        DateTime @default(now())
+  id                   Int      @id @default(autoincrement())
+  vehicle_type         String   @db.VarChar(50)
+  destination_category String?  @db.VarChar(20)
+  rate_per_km          Float?
+  rate_per_hour        Float?
+  rate_per_day         Float?
+  condition            String?  @db.VarChar(50)
+  adjustment           Float?
+  created_at           DateTime @default(now())
 
   @@unique([vehicle_type, destination_category])
 }
+
 model quote {
   id          Int      @id @default(autoincrement())
   useCase     String
