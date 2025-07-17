@@ -16,6 +16,7 @@ export default function VehiclesPage() {
         const res = await fetch('/api/vehicles');
         if (!res.ok) throw new Error('Failed to fetch vehicles');
         const data = await res.json();
+         console.log('🚗 Vehicles Data:', data); 
         setVehicles(data);
       } catch (error) {
         console.error('Error fetching vehicles:', error);
@@ -42,13 +43,7 @@ export default function VehiclesPage() {
     setVehicleToDelete(null);
   };
 
-  const toggleStatus = (id) => {
-    setVehicles(vehicles.map(vehicle =>
-      vehicle.id === id
-        ? { ...vehicle, status: vehicle.status === 'Active' ? 'Inactive' : 'Active' }
-        : vehicle
-    ));
-  };
+
 
   return (
     <div className="space-y-6">
@@ -116,19 +111,19 @@ export default function VehiclesPage() {
               <div className="space-y-2 mb-4 text-sm text-gray-700">
                 <div className="flex justify-between">
                   <span>Capacity:</span>
-                  <span className="font-medium">{vehicle.capacity} passengers</span>
+                  <span className="font-medium">{vehicle.passengerCapacity} passengers</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Luggage:</span>
-                  <span className="font-medium">{vehicle.luggage} bags</span>
+                  <span className="font-medium">{vehicle.suitcaseCapacity}  bags</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Base Rate:</span>
-                  <span className="font-medium">₹{vehicle.baseRate}/km</span>
+                  <span className="font-medium">{vehicle.ratePerKm != null ? vehicle.ratePerKm : 'N/A'}/km</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Hourly Rate:</span>
-                  <span className="font-medium">₹{vehicle.hourlyRate}/hr</span>
+                  <span className="font-medium">{vehicle.ratePerHour != null ? vehicle.ratePerHour : 'N/A'}/hr</span>
                 </div>
               </div>
 
@@ -139,16 +134,7 @@ export default function VehiclesPage() {
                 >
                   Edit
                 </Link>
-                <button
-                  onClick={() => toggleStatus(vehicle.id)}
-                  className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition ${
-                    vehicle.status === 'Active'
-                      ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'
-                      : 'bg-green-100 text-green-800 hover:bg-green-200'
-                  }`}
-                >
-                  {vehicle.status === 'Active' ? 'Deactivate' : 'Activate'}
-                </button>
+                
                 <button
                   onClick={() => handleDelete(vehicle)}
                   className="bg-red-100 text-red-800 py-2 px-3 rounded-md text-sm font-medium hover:bg-red-200 transition"
