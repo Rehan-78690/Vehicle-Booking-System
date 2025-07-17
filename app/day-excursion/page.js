@@ -22,7 +22,7 @@ export default function Page() {
       const result = await response.json();
       
       if (response.ok) {
-        router.push(`/confirmation?id=${result.id}`);
+        router.push(`/quote-confirmation`);
       } else {
         console.error('Quote creation failed:', result.error);
         alert('Failed to create quote. Please try again.');

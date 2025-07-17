@@ -16,7 +16,7 @@ export default function Page() {
     //   method: 'POST',
     //   body: JSON.stringify(formData)
     // });
-    router.push('/confirmation');
+    router.push('/quote-confirmation');
   };
 
   return(

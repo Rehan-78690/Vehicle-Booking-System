@@ -28,11 +28,12 @@ export default function QuotationPage() {
             <h3 className="text-lg font-medium text-gray-900 mb-4">Select Service Type</h3>
             <div className="space-y-4">
               {[
-                { value: 'one_way', label: 'One-Way Transfer' },
+                { value: 'one-way', label: 'One-Way Transfer' },
                 { value: 'hourly-disposal', label: 'Disposal within the City' },
                 { value: 'multi-day', label: 'Multi-Day Tours' },
                 { value: 'day-excursion', label: 'Day Excursions' },
                 { value: 'day-excursion-disposal', label: 'Day Excursions + Disposal' }
+                
               ].map((option) => (
                 <div key={option.value} className="flex items-start">
                   <input
