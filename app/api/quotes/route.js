@@ -4,6 +4,17 @@ import prisma from '@/lib/prisma';
 import { calculateQuote } from '@/lib/quoteLogic';
 import { validateQuoteRequest } from '@/lib/validation';
 
+
+export async function GET() {
+  try {
+    const quotes = await prisma.quote.findMany({
+      orderBy: { createdAt: 'desc' }
+    });
+    return NextResponse.json(quotes);
+  } catch (error) {
+    return NextResponse.json({ error: 'Failed to fetch quotes' }, { status: 500 });
+  }
+}
 export async function POST(req) {
   try {
     /* ---------- 1. read the body ONCE ---------- */
