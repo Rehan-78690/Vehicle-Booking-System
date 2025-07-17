@@ -2,6 +2,8 @@
 
 import OneWayForm from '@/components/OneWayForm';
 import FormLayout from '@/components/FormLayout';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 export default function Page() {
   const router = useRouter();
 
@@ -56,19 +58,11 @@ export default function Page() {
 
 
 
-  return (
-    <div>
-      <OneWayForm onSubmit={handleFormSubmit} />
-
-      {/* {quoteResult && quoteResult.price && (
-  <div className="max-w-xl mx-auto mt-6 bg-green-100 border border-green-300 rounded p-4">
-    <h2 className="text-lg font-bold text-green-800">Quote Summary</h2>
-    <p className="mt-2 text-green-700">
-      Estimated Price: <strong>${quoteResult.price.total_price?.toFixed(2) || 'N/A'}</strong>
-    </p>
-    <p className="text-green-700">Vehicle: {quoteResult.vehicle || 'N/A'}</p>
-  </div>
-)} */}
-    </div>
+return (
+    <FormLayout>
+      <div>
+        <OneWayForm onSubmit={handleFormSubmit} />
+      </div>
+    </FormLayout>
   );
 }
