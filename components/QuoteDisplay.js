@@ -1,4 +1,3 @@
-// Quotation output component
 import { useState } from 'react';
 
 export default function QuoteDisplay({ formData, useCaseType }) {
@@ -43,10 +42,10 @@ export default function QuoteDisplay({ formData, useCaseType }) {
         <div className="quote-result">
           <h3>Your Quotation</h3>
           <p><strong>Vehicle:</strong> {quote.vehicle}</p>
-          <p><strong>Total Price:</strong> €{quote.total_price.toFixed(2)}</p>
-          <p><strong>Calculation:</strong> {quote.calculation_type}</p>
-          {quote.distance_km && (
-            <p><strong>Distance:</strong> {quote.distance_km} km</p>
+          <p><strong>Total Price:</strong> €{quote.price.total_price.toFixed(2)}</p>
+          <p><strong>Calculation:</strong> {quote.price.calculation_type}</p>
+          {quote.price.distance_km && (
+            <p><strong>Distance:</strong> {quote.price.distance_km} km</p>
           )}
         </div>
       )}

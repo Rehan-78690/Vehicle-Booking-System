@@ -29,3 +29,12 @@ model pricing {
 
   @@unique([vehicle_type, destination_category])
 }
+model quote {
+  id          Int      @id @default(autoincrement())
+  useCase     String
+  formData    Json
+  price       Float
+  vehicleType String
+  distance    Float
+  createdAt   DateTime @default(now())
+}

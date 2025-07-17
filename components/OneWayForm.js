@@ -80,32 +80,30 @@ const europeanCities = {
   }
 };
 
-const vehicleOptions = [
-  // Sedans
-  { id: 1, type: 'Standard Sedan', category: 'Sedan', capacity: '1-2 passengers, 2 suitcases', maxPassengers: 2, maxLuggage: 2 },
-  { id: 2, type: 'Premium Sedan', category: 'Sedan', capacity: '1-2 passengers, 2 suitcases', maxPassengers: 2, maxLuggage: 2 },
-  // Minivans
-  { id: 3, type: 'Standard Minivan (8-seater)', category: 'Minivan', capacity: '1-7 passengers, 6 suitcases', maxPassengers: 7, maxLuggage: 6 },
-  { id: 4, type: 'Premium Minivan (8-seater Mercedes)', category: 'Minivan', capacity: '1-7 passengers, 6 suitcases', maxPassengers: 7, maxLuggage: 6 },
-  { id: 5, type: 'Standard Minivan (9-seater)', category: 'Minivan', capacity: '1-8 passengers, 6 suitcases', maxPassengers: 8, maxLuggage: 6 },
-  { id: 6, type: 'Mercedes Minivan (9-seater)', category: 'Minivan', capacity: '1-8 passengers, 6 suitcases', maxPassengers: 8, maxLuggage: 6 },
-  // Sprinters
-  { id: 7, type: 'Mercedes Sprinter (9-Seater)', category: 'Sprinter', capacity: '8 passengers, 10 suitcases', maxPassengers: 8, maxLuggage: 10 },
-  { id: 8, type: 'Mercedes Sprinter (12-Seater)', category: 'Sprinter', capacity: '11 passengers, 12 suitcases', maxPassengers: 11, maxLuggage: 12 },
-  { id: 9, type: 'Mercedes Sprinter (16-Seater)', category: 'Sprinter', capacity: '15 passengers, 14 suitcases', maxPassengers: 15, maxLuggage: 14 },
-  { id: 10, type: 'Mercedes Sprinter (19-Seater)', category: 'Sprinter', capacity: '18 passengers, 15 suitcases', maxPassengers: 18, maxLuggage: 15 },
-  // Buses
-  { id: 11, type: '30-Seater Bus', category: 'Bus', capacity: '29 passengers, 25 suitcases', maxPassengers: 29, maxLuggage: 25 },
-  { id: 12, type: '50-Seater Bus', category: 'Bus', capacity: '49 passengers, 45 suitcases', maxPassengers: 49, maxLuggage: 45 },
-  { id: 13, type: '54-Seater Bus', category: 'Bus', capacity: '53 passengers, 50 suitcases', maxPassengers: 53, maxLuggage: 50 },
-  { id: 14, type: '57-Seater Bus', category: 'Bus', capacity: '56 passengers, 55 suitcases', maxPassengers: 56, maxLuggage: 55 },
-  { id: 15, type: '60-Seater Bus', category: 'Bus', capacity: '59 passengers, 58 suitcases', maxPassengers: 59, maxLuggage: 58 },
-  { id: 16, type: '77-Seater (Double-Decker)', category: 'Bus', capacity: '76 passengers, 60 suitcases', maxPassengers: 76, maxLuggage: 60 }
-];
+
+
 
 export default function OneWayForm({ onSubmit }) {
   const router = useRouter();
+  const [allVehicles, setAllVehicles] = useState([]);
+  const [suggestedVehicles, setSuggestedVehicles] = useState([]);
+
   const [routeType, setRouteType] = useState('predefined');
+  useEffect(() => {
+  const fetchVehicles = async () => {
+    try {
+      const res = await fetch('/api/vehicles');
+      if (!res.ok) throw new Error('Failed to fetch vehicles');
+      const data = await res.json();
+      setAllVehicles(data);
+    } catch (error) {
+      console.error('Error fetching vehicles:', error);
+    }
+  };
+
+  fetchVehicles();
+}, []);
+  
   const [formData, setFormData] = useState({
     city: '',
     pickupPoint: '',
@@ -118,8 +116,7 @@ export default function OneWayForm({ onSubmit }) {
     luggage: 1,
     vehicleType: ''
   });
-  const [suggestedVehicles, setSuggestedVehicles] = useState([]);
-
+  
   // Reset pickup/dropoff when city changes
   useEffect(() => {
     if (formData.city) {
@@ -132,25 +129,34 @@ export default function OneWayForm({ onSubmit }) {
   }, [formData.city]);
 
   // Vehicle suggestion logic
-  useEffect(() => {
-    const filtered = vehicleOptions.filter(
-      vehicle => vehicle.maxPassengers >= formData.travelers && 
-                vehicle.maxLuggage >= formData.luggage
-    );
-    setSuggestedVehicles(filtered);
-    if (filtered.length > 0 && !formData.vehicleType) {
-      setFormData(prev => ({ ...prev, vehicleType: filtered[0].type }));
-    }
-  }, [formData.travelers, formData.luggage]);
+ useEffect(() => {
+  if (allVehicles.length === 0) return;
+
+  const filtered = allVehicles.filter(
+    vehicle =>
+      vehicle.passengerCapacity >= formData.travelers &&
+      vehicle.suitcaseCapacity >= formData.luggage
+  );
+
+  setSuggestedVehicles(filtered);
+
+  if (filtered.length > 0 && !formData.vehicle_type) {
+    setFormData(prev => ({
+      ...prev,
+      vehicleType: filtered[0].type // use .name if that’s what’s used in the API
+    }));
+  }
+}, [formData.travelers, formData.luggage, allVehicles]);
+
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onSubmit(formData);
+const handleSubmit = (e) => {
+  e.preventDefault();
+  onSubmit({ ...formData, routeType });
   };
 
   return (
@@ -331,18 +337,18 @@ export default function OneWayForm({ onSubmit }) {
           <div>
             <label className="block text-sm font-medium mb-1">Vehicle Type</label>
             <select
-              name="vehicleType"
-              value={formData.vehicleType}
+              name="vehicle_type"
+              value={formData.vehicle_type}
               onChange={handleInputChange}
               className="w-full border border-gray-300 rounded-md p-2"
               required
             >
               <option value="">Select Vehicle</option>
-              {suggestedVehicles.map(vehicle => (
-                <option key={vehicle.id} value={vehicle.type}>
-                  {vehicle.type} ({vehicle.capacity})
-                </option>
-              ))}
+             {suggestedVehicles.map(vehicle => (
+  <option key={vehicle.id} value={vehicle.type}>
+    {vehicle.type} - {vehicle.name} ({vehicle.passengerCapacity} pax, {vehicle.suitcaseCapacity} bags)
+  </option>
+))}
             </select>
           </div>
 
