@@ -36,6 +36,8 @@ model quote {
   formData    Json
   price       Float
   vehicleType String
-  distance    Float
+  distance    Float?
+  hours       Int?
+  bookingDays Int?
   createdAt   DateTime @default(now())
 }

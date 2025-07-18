@@ -5,105 +5,31 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import FormLayout from './FormLayout';
+
 const europeanCities = {
-  'Paris, France': {
-    pickups: ['CDG Airport', 'Orly Airport', 'Gare du Nord', 'Gare de Lyon', 'Hotel Le Bristol'],
-    dropoffs: ['Eiffel Tower', 'Louvre Museum', 'Champs-Élysées', 'Montmartre', 'Notre-Dame']
-  },
-  'Rome, Italy': {
-    pickups: ['Fiumicino Airport', 'Ciampino Airport', 'Roma Termini', 'Hotel Hassler'],
-    dropoffs: ['Colosseum', 'Vatican City', 'Trevi Fountain', 'Pantheon']
-  },
-  'London, UK': {
-    pickups: ['Heathrow Airport', 'Gatwick Airport', 'King\'s Cross Station', 'The Savoy Hotel'],
-    dropoffs: ['Big Ben', 'London Eye', 'Buckingham Palace', 'Tower of London']
-  },
-  'Berlin, Germany': {
-    pickups: ['BER Airport', 'Berlin Hauptbahnhof', 'Hotel Adlon Kempinski'],
-    dropoffs: ['Brandenburg Gate', 'Reichstag', 'Berlin Wall Memorial']
-  },
-  'Madrid, Spain': {
-    pickups: ['Adolfo Suárez Airport', 'Atocha Station', 'Hotel Ritz Madrid'],
-    dropoffs: ['Prado Museum', 'Royal Palace', 'Plaza Mayor']
-  },
-  'Amsterdam, Netherlands': {
-    pickups: ['Schiphol Airport', 'Amsterdam Centraal', 'Hotel TwentySeven'],
-    dropoffs: ['Van Gogh Museum', 'Anne Frank House', 'Rijksmuseum']
-  },
-  'Vienna, Austria': {
-    pickups: ['Vienna Airport', 'Wien Hauptbahnhof', 'Hotel Sacher'],
-    dropoffs: ['Schönbrunn Palace', 'St. Stephen\'s Cathedral', 'Belvedere Palace']
-  },
-  'Brussels, Belgium': {
-    pickups: ['Brussels Airport', 'Brussels Central Station', 'Hotel Amigo'],
-    dropoffs: ['Grand Place', 'Atomium', 'Manneken Pis']
-  },
-  'Prague, Czech Republic': {
-    pickups: ['Václav Havel Airport', 'Prague Main Station', 'Hotel Paris Prague'],
-    dropoffs: ['Charles Bridge', 'Prague Castle', 'Old Town Square']
-  },
-  'Budapest, Hungary': {
-    pickups: ['Budapest Airport', 'Keleti Station', 'Four Seasons Gresham Palace'],
-    dropoffs: ['Buda Castle', 'Parliament Building', 'Fisherman\'s Bastion']
-  },
-  'Warsaw, Poland': {
-    pickups: ['Chopin Airport', 'Warsaw Central Station', 'Hotel Bristol'],
-    dropoffs: ['Old Town', 'Royal Castle', 'Łazienki Park']
-  },
-  'Lisbon, Portugal': {
-    pickups: ['Humberto Delgado Airport', 'Santa Apolónia Station', 'Hotel Avenida Palace'],
-    dropoffs: ['Belém Tower', 'Jerónimos Monastery', 'Alfama District']
-  },
-  'Dublin, Ireland': {
-    pickups: ['Dublin Airport', 'Heuston Station', 'The Shelbourne'],
-    dropoffs: ['Trinity College', 'Guinness Storehouse', 'Temple Bar']
-  },
-  'Stockholm, Sweden': {
-    pickups: ['Arlanda Airport', 'Stockholm Central Station', 'Grand Hôtel'],
-    dropoffs: ['Gamla Stan', 'Vasa Museum', 'Skansen']
-  },
-  'Oslo, Norway': {
-    pickups: ['Oslo Airport', 'Oslo Central Station', 'The Thief'],
-    dropoffs: ['Viking Ship Museum', 'Opera House', 'Frogner Park']
-  },
-  'Copenhagen, Denmark': {
-    pickups: ['Copenhagen Airport', 'København H', 'Hotel d\'Angleterre'],
-    dropoffs: ['Tivoli Gardens', 'The Little Mermaid', 'Nyhavn']
-  },
-  'Athens, Greece': {
-    pickups: ['Athens Airport', 'Larissa Station', 'Hotel Grande Bretagne'],
-    dropoffs: ['Acropolis', 'Parthenon', 'Plaka District']
-  },
-  'Zurich, Switzerland': {
-    pickups: ['Zurich Airport', 'Zürich HB', 'Baur au Lac'],
-    dropoffs: ['Lake Zurich', 'Old Town', 'Bahnhofstrasse']
-  }
+  'Paris, France': { pickups: ['CDG Airport', 'Orly Airport', 'Gare du Nord', 'Gare de Lyon', 'Hotel Le Bristol'], dropoffs: ['Eiffel Tower', 'Louvre Museum', 'Champs-Élysées', 'Montmartre', 'Notre-Dame'] },
+  'Rome, Italy': { pickups: ['Fiumicino Airport', 'Ciampino Airport', 'Roma Termini', 'Hotel Hassler'], dropoffs: ['Colosseum', 'Vatican City', 'Trevi Fountain', 'Pantheon'] },
+  'London, UK': { pickups: ['Heathrow Airport', 'Gatwick Airport', 'King\'s Cross Station', 'The Savoy Hotel'], dropoffs: ['Big Ben', 'London Eye', 'Buckingham Palace', 'Tower of London'] },
+  'Berlin, Germany': { pickups: ['BER Airport', 'Berlin Hauptbahnhof', 'Hotel Adlon Kempinski'], dropoffs: ['Brandenburg Gate', 'Reichstag', 'Berlin Wall Memorial'] },
+  'Madrid, Spain': { pickups: ['Adolfo Suárez Airport', 'Atocha Station', 'Hotel Ritz Madrid'], dropoffs: ['Prado Museum', 'Royal Palace', 'Plaza Mayor'] },
+  'Amsterdam, Netherlands': { pickups: ['Schiphol Airport', 'Amsterdam Centraal', 'Hotel TwentySeven'], dropoffs: ['Van Gogh Museum', 'Anne Frank House', 'Rijksmuseum'] },
+  'Vienna, Austria': { pickups: ['Vienna Airport', 'Wien Hauptbahnhof', 'Hotel Sacher'], dropoffs: ['Schönbrunn Palace', 'St. Stephen\'s Cathedral', 'Belvedere Palace'] },
+  'Brussels, Belgium': { pickups: ['Brussels Airport', 'Brussels Central Station', 'Hotel Amigo'], dropoffs: ['Grand Place', 'Atomium', 'Manneken Pis'] },
+  'Prague, Czech Republic': { pickups: ['Václav Havel Airport', 'Prague Main Station', 'Hotel Paris Prague'], dropoffs: ['Charles Bridge', 'Prague Castle', 'Old Town Square'] },
+  'Budapest, Hungary': { pickups: ['Budapest Airport', 'Keleti Station', 'Four Seasons Gresham Palace'], dropoffs: ['Buda Castle', 'Parliament Building', 'Fisherman\'s Bastion'] },
+  'Warsaw, Poland': { pickups: ['Chopin Airport', 'Warsaw Central Station', 'Hotel Bristol'], dropoffs: ['Old Town', 'Royal Castle', 'Łazienki Park'] },
+  'Lisbon, Portugal': { pickups: ['Humberto Delgado Airport', 'Santa Apolónia Station', 'Hotel Avenida Palace'], dropoffs: ['Belém Tower', 'Jerónimos Monastery', 'Alfama District'] },
+  'Dublin, Ireland': { pickups: ['Dublin Airport', 'Heuston Station', 'The Shelbourne'], dropoffs: ['Trinity College', 'Guinness Storehouse', 'Temple Bar'] },
+  'Stockholm, Sweden': { pickups: ['Arlanda Airport', 'Stockholm Central Station', 'Grand Hôtel'], dropoffs: ['Gamla Stan', 'Vasa Museum', 'Skansen'] },
+  'Oslo, Norway': { pickups: ['Oslo Airport', 'Oslo Central Station', 'The Thief'], dropoffs: ['Viking Ship Museum', 'Opera House', 'Frogner Park'] },
+  'Copenhagen, Denmark': { pickups: ['Copenhagen Airport', 'København H', 'Hotel d\'Angleterre'], dropoffs: ['Tivoli Gardens', 'The Little Mermaid', 'Nyhavn'] },
+  'Athens, Greece': { pickups: ['Athens Airport', 'Larissa Station', 'Hotel Grande Bretagne'], dropoffs: ['Acropolis', 'Parthenon', 'Plaka District'] },
+  'Zurich, Switzerland': { pickups: ['Zurich Airport', 'Zürich HB', 'Baur au Lac'], dropoffs: ['Lake Zurich', 'Old Town', 'Bahnhofstrasse'] },
 };
 
-
-
-
 export default function OneWayForm({ onSubmit }) {
-  const router = useRouter();
   const [allVehicles, setAllVehicles] = useState([]);
   const [suggestedVehicles, setSuggestedVehicles] = useState([]);
-
-  const [routeType, setRouteType] = useState('predefined');
-  useEffect(() => {
-  const fetchVehicles = async () => {
-    try {
-      const res = await fetch('/api/vehicles');
-      if (!res.ok) throw new Error('Failed to fetch vehicles');
-      const data = await res.json();
-      setAllVehicles(data);
-    } catch (error) {
-      console.error('Error fetching vehicles:', error);
-    }
-  };
-
-  fetchVehicles();
-}, []);
-  
   const [formData, setFormData] = useState({
     city: '',
     pickupPoint: '',
@@ -114,56 +40,65 @@ export default function OneWayForm({ onSubmit }) {
     pickupTime: '',
     travelers: 1,
     luggage: 1,
-    vehicleType: ''
+    vehicleType: '',
+    distance: '',
   });
-  
-  // Reset pickup/dropoff when city changes
+
+  useEffect(() => {
+    const fetchVehicles = async () => {
+      try {
+        const res = await fetch('/api/vehicles');
+        if (!res.ok) throw new Error('Failed to fetch vehicles');
+        const data = await res.json();
+        setAllVehicles(data);
+      } catch (error) {
+        console.error('Error fetching vehicles:', error);
+      }
+    };
+    fetchVehicles();
+  }, []);
+
+  useEffect(() => {
+    if (allVehicles.length === 0) return;
+    const filtered = allVehicles.filter(
+      (vehicle) =>
+        vehicle.passengerCapacity >= formData.travelers &&
+        vehicle.suitcaseCapacity >= formData.luggage
+    );
+    setSuggestedVehicles(filtered);
+    if (filtered.length > 0 && !formData.vehicleType) {
+      setFormData((prev) => ({
+        ...prev,
+        vehicleType: filtered[0].type,
+      }));
+    }
+  }, [formData.travelers, formData.luggage, allVehicles]);
+
   useEffect(() => {
     if (formData.city) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         pickupPoint: '',
-        dropoffPoint: ''
+        dropoffPoint: '',
       }));
     }
   }, [formData.city]);
 
-  // Vehicle suggestion logic
- useEffect(() => {
-  if (allVehicles.length === 0) return;
-
-  const filtered = allVehicles.filter(
-    vehicle =>
-      vehicle.passengerCapacity >= formData.travelers &&
-      vehicle.suitcaseCapacity >= formData.luggage
-  );
-
-  setSuggestedVehicles(filtered);
-
-  if (filtered.length > 0 && !formData.vehicle_type) {
-    setFormData(prev => ({
-      ...prev,
-      vehicleType: filtered[0].type // use .name if that’s what’s used in the API
-    }));
-  }
-}, [formData.travelers, formData.luggage, allVehicles]);
-
-
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-const handleSubmit = (e) => {
-  e.preventDefault();
-  onSubmit({ ...formData, routeType });
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (onSubmit) {
+      onSubmit(formData);
+    }
   };
 
   return (
-    
-    <div className="min-h-screen bg-gray-50 ">
+    <div className="min-h-screen bg-gray-50">
       <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-md overflow-hidden">
-        {/* Header with Back Button */}
         <div className="bg-[#27368c] p-6 text-white relative">
           <Link href="/quotation" className="absolute left-6 top-6 text-white hover:text-gray-200">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -174,7 +109,6 @@ const handleSubmit = (e) => {
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          {/* Route Type Selection */}
           <div className="space-y-4">
             <h3 className="text-lg font-medium">Route Type</h3>
             <div className="flex gap-4">
@@ -182,8 +116,8 @@ const handleSubmit = (e) => {
                 <input
                   type="radio"
                   name="routeType"
-                  checked={routeType === 'predefined'}
-                  onChange={() => setRouteType('predefined')}
+                  checked={formData.routeType === 'predefined'}
+                  onChange={() => setFormData((prev) => ({ ...prev, routeType: 'predefined' }))}
                   className="text-[#b82025] focus:ring-[#b82025]"
                 />
                 Predefined Route
@@ -192,16 +126,15 @@ const handleSubmit = (e) => {
                 <input
                   type="radio"
                   name="routeType"
-                  checked={routeType === 'custom'}
-                  onChange={() => setRouteType('custom')}
+                  checked={formData.routeType === 'custom'}
+                  onChange={() => setFormData((prev) => ({ ...prev, routeType: 'custom' }))}
                   className="text-[#b82025] focus:ring-[#b82025]"
                 />
                 Custom Route
               </label>
             </div>
 
-            {/* Predefined Route Fields */}
-            {routeType === 'predefined' && (
+            {formData.routeType === 'predefined' && (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium mb-1">City</label>
@@ -213,8 +146,10 @@ const handleSubmit = (e) => {
                     required
                   >
                     <option value="">Select European City</option>
-                    {Object.keys(europeanCities).map(city => (
-                      <option key={city} value={city}>{city}</option>
+                    {Object.keys(europeanCities).map((city) => (
+                      <option key={city} value={city}>
+                        {city}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -229,8 +164,10 @@ const handleSubmit = (e) => {
                     disabled={!formData.city}
                   >
                     <option value="">Select Pickup</option>
-                    {formData.city && europeanCities[formData.city].pickups.map(point => (
-                      <option key={point} value={point}>{point}</option>
+                    {formData.city && europeanCities[formData.city].pickups.map((point) => (
+                      <option key={point} value={point}>
+                        {point}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -245,16 +182,17 @@ const handleSubmit = (e) => {
                     disabled={!formData.city}
                   >
                     <option value="">Select Drop-off</option>
-                    {formData.city && europeanCities[formData.city].dropoffs.map(point => (
-                      <option key={point} value={point}>{point}</option>
+                    {formData.city && europeanCities[formData.city].dropoffs.map((point) => (
+                      <option key={point} value={point}>
+                        {point}
+                      </option>
                     ))}
                   </select>
                 </div>
               </div>
             )}
 
-            {/* Custom Route Fields */}
-            {routeType === 'custom' && (
+            {formData.routeType === 'custom' && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium mb-1">Pickup Location</label>
@@ -284,7 +222,6 @@ const handleSubmit = (e) => {
             )}
           </div>
 
-          {/* Common Fields */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
               <label className="block text-sm font-medium mb-1">Pickup Date</label>
@@ -332,24 +269,36 @@ const handleSubmit = (e) => {
                 required
               />
             </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Distance (km)</label>
+              <input
+                type="number"
+                name="distance"
+                min="1"
+                value={formData.distance}
+                onChange={handleInputChange}
+                className="w-full border border-gray-300 rounded-md p-2"
+                required
+                placeholder="Enter distance"
+              />
+            </div>
           </div>
 
-          {/* Vehicle Selection */}
           <div>
             <label className="block text-sm font-medium mb-1">Vehicle Type</label>
             <select
-              name="vehicle_type"
-              value={formData.vehicle_type}
+              name="vehicleType"
+              value={formData.vehicleType}
               onChange={handleInputChange}
               className="w-full border border-gray-300 rounded-md p-2"
               required
             >
               <option value="">Select Vehicle</option>
-             {suggestedVehicles.map(vehicle => (
-  <option key={vehicle.id} value={vehicle.type}>
-    {vehicle.type} - {vehicle.name} ({vehicle.passengerCapacity} pax, {vehicle.suitcaseCapacity} bags)
-  </option>
-))}
+              {suggestedVehicles.map((vehicle) => (
+                <option key={vehicle.id} value={vehicle.type}>
+                  {vehicle.type} - {vehicle.name} ({vehicle.passengerCapacity} pax, {vehicle.suitcaseCapacity} bags)
+                </option>
+              ))}
             </select>
           </div>
 

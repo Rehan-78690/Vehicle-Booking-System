@@ -88,20 +88,16 @@ const europeanCities = {
 };
 
 const vehicleOptions = [
-  // Sedans
-  { id: 1, type: 'Standard Sedan', category: 'Sedan', capacity: '1-2 passengers, 2 suitcases', maxPassengers: 2, maxLuggage: 2 },
+  { id: 1, type: 'sedan', category: 'Sedan', capacity: '1-2 passengers, 2 suitcases', maxPassengers: 2, maxLuggage: 2 },
   { id: 2, type: 'Premium Sedan (Mercedes E-Class/BMW/Audi)', category: 'Sedan', capacity: '1-2 passengers, 2 suitcases', maxPassengers: 2, maxLuggage: 2 },
-  // Minivans
   { id: 3, type: 'Standard Minivan (8-seater)', category: 'Minivan', capacity: '1-7 passengers, 6 suitcases', maxPassengers: 7, maxLuggage: 6 },
   { id: 4, type: 'Premium Minivan (8-seater Mercedes)', category: 'Minivan', capacity: '1-7 passengers, 6 suitcases', maxPassengers: 7, maxLuggage: 6 },
   { id: 5, type: 'Standard Minivan (9-seater)', category: 'Minivan', capacity: '1-8 passengers, 6 suitcases', maxPassengers: 8, maxLuggage: 6 },
   { id: 6, type: 'Mercedes Minivan (9-seater)', category: 'Minivan', capacity: '1-8 passengers, 6 suitcases', maxPassengers: 8, maxLuggage: 6 },
-  // Sprinters
   { id: 7, type: 'Mercedes Sprinter (9-Seater)', category: 'Sprinter', capacity: '8 passengers, 10 suitcases', maxPassengers: 8, maxLuggage: 10 },
   { id: 8, type: 'Mercedes Sprinter (12-Seater)', category: 'Sprinter', capacity: '11 passengers, 12 suitcases', maxPassengers: 11, maxLuggage: 12 },
   { id: 9, type: 'Mercedes Sprinter (16-Seater)', category: 'Sprinter', capacity: '15 passengers, 14 suitcases', maxPassengers: 15, maxLuggage: 14 },
   { id: 10, type: 'Mercedes Sprinter (19-Seater)', category: 'Sprinter', capacity: '18 passengers, 15 suitcases', maxPassengers: 18, maxLuggage: 15 },
-  // Buses
   { id: 11, type: '30-Seater Bus', category: 'Bus', capacity: '29 passengers, 25 suitcases', maxPassengers: 29, maxLuggage: 25 },
   { id: 12, type: '50-Seater Bus', category: 'Bus', capacity: '49 passengers, 45 suitcases', maxPassengers: 49, maxLuggage: 45 },
   { id: 13, type: '54-Seater Bus', category: 'Bus', capacity: '53 passengers, 50 suitcases', maxPassengers: 53, maxLuggage: 50 },
@@ -126,8 +122,8 @@ export default function IntercityTransferForm({ onSubmit }) {
   // Vehicle suggestion logic
   useEffect(() => {
     const filtered = vehicleOptions.filter(
-      vehicle => vehicle.maxPassengers >= formData.travelers && 
-                vehicle.maxLuggage >= formData.luggage
+      vehicle => vehicle.maxPassengers >= formData.travelers &&
+        vehicle.maxLuggage >= formData.luggage
     );
     setSuggestedVehicles(filtered);
     if (filtered.length > 0 && !formData.vehicleType) {
@@ -150,148 +146,150 @@ export default function IntercityTransferForm({ onSubmit }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit(formData);
+    if (onSubmit) {
+      onSubmit(formData);
+    }
   };
 
-return (
+  return (
+    <FormLayout>
+      <div className="min-h-screen bg-gray-50 ">
+        <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-md overflow-hidden">
+          {/* Header with Back Button */}
+          <div className="bg-[#27368c] p-4 text-white relative">
+            <Link href="/quotation" className="absolute left-3 top-5 text-white hover:text-gray-200">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+            </Link>
+            <h1 className="text-2xl font-bold text-center">Intercity Transfer with Disposal</h1>
+          </div>
 
-  <FormLayout>
-    <div className="min-h-screen bg-gray-50 ">
-      <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-md overflow-hidden">
-        {/* Header with Back Button */}
-        <div className="bg-[#27368c] p-4  text-white relative">
-          <Link href="/quotation" className="absolute left-3 top-5 text-white hover:text-gray-200">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
-          </Link>
-          <h1 className="text-2xl font-bold text-center">Intercity Transfer with Disposal</h1>
+          <form onSubmit={handleSubmit} className="p-6 space-y-6">
+            {/* Date and Cities */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Date</label>
+                <input
+                  type="date"
+                  name="date"
+                  value={formData.date}
+                  onChange={handleInputChange}
+                  min={new Date().toISOString().split('T')[0]}
+                  className="w-full border border-gray-300 rounded-md p-2"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Pickup City</label>
+                <select
+                  name="pickupCity"
+                  value={formData.pickupCity}
+                  onChange={handleInputChange}
+                  className="w-full border border-gray-300 rounded-md p-2"
+                  required
+                >
+                  <option value="">Select City</option>
+                  {Object.keys(europeanCities).map(city => (
+                    <option key={city} value={city}>{city}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Dropping City</label>
+                <select
+                  name="dropoffCity"
+                  value={formData.dropoffCity}
+                  onChange={handleInputChange}
+                  className="w-full border border-gray-300 rounded-md p-2"
+                  required
+                >
+                  <option value="">Select City</option>
+                  {Object.keys(europeanCities).map(city => (
+                    <option key={city} value={city}>{city}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Distance Display */}
+            {formData.distance > 0 && (
+              <div className="text-right">
+                <span className="text-sm font-medium">Estimated Distance: </span>
+                <span className="text-sm">{formData.distance} KM</span>
+              </div>
+            )}
+
+            {/* Hours and Passengers */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">No. of Hours</label>
+                <input
+                  type="number"
+                  name="hours"
+                  min="1"
+                  value={formData.hours}
+                  onChange={handleInputChange}
+                  className="w-full border border-gray-300 rounded-md p-2"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">No. of Travellers</label>
+                <input
+                  type="number"
+                  name="travelers"
+                  min="1"
+                  value={formData.travelers}
+                  onChange={handleInputChange}
+                  className="w-full border border-gray-300 rounded-md p-2"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">No. of Luggages</label>
+                <input
+                  type="number"
+                  name="luggage"
+                  min="0"
+                  value={formData.luggage}
+                  onChange={handleInputChange}
+                  className="w-full border border-gray-300 rounded-md p-2"
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Vehicle Selection */}
+            <div>
+              <label className="block text-sm font-medium mb-1">Vehicle Type</label>
+              <select
+                name="vehicleType"
+                value={formData.vehicleType}
+                onChange={handleInputChange}
+                className="w-full border border-gray-300 rounded-md p-2"
+                required
+              >
+                <option value="">Select Vehicle</option>
+                {suggestedVehicles.map(vehicle => (
+                  <option key={vehicle.id} value={vehicle.type}>
+                    {vehicle.type} ({vehicle.capacity})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex justify-end pt-4">
+              <button
+                type="submit"
+                className="bg-[#b82025] text-white px-6 py-2 rounded-md hover:bg-[#9a1a1f]"
+              >
+                Get Quote
+              </button>
+            </div>
+          </form>
         </div>
-
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          {/* Date and Cities */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-medium mb-1">Date</label>
-              <input
-                type="date"
-                name="date"
-                value={formData.date}
-                onChange={handleInputChange}
-                min={new Date().toISOString().split('T')[0]}
-                className="w-full border border-gray-300 rounded-md p-2"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Pickup City</label>
-              <select
-                name="pickupCity"
-                value={formData.pickupCity}
-                onChange={handleInputChange}
-                className="w-full border border-gray-300 rounded-md p-2"
-                required
-              >
-                <option value="">Select City</option>
-                {Object.keys(europeanCities).map(city => (
-                  <option key={city} value={city}>{city}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Dropping City</label>
-              <select
-                name="dropoffCity"
-                value={formData.dropoffCity}
-                onChange={handleInputChange}
-                className="w-full border border-gray-300 rounded-md p-2"
-                required
-              >
-                <option value="">Select City</option>
-                {Object.keys(europeanCities).map(city => (
-                  <option key={city} value={city}>{city}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          {/* Distance Display */}
-          {formData.distance > 0 && (
-            <div className="text-right">
-              <span className="text-sm font-medium">Estimated Distance: </span>
-              <span className="text-sm">{formData.distance} KM</span>
-            </div>
-          )}
-
-          {/* Hours and Passengers */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-medium mb-1">No. of Hours</label>
-              <input
-                type="number"
-                name="hours"
-                min="1"
-                value={formData.hours}
-                onChange={handleInputChange}
-                className="w-full border border-gray-300 rounded-md p-2"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">No. of Travellers</label>
-              <input
-                type="number"
-                name="travelers"
-                min="1"
-                value={formData.travelers}
-                onChange={handleInputChange}
-                className="w-full border border-gray-300 rounded-md p-2"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">No. of Luggages</label>
-              <input
-                type="number"
-                name="luggage"
-                min="0"
-                value={formData.luggage}
-                onChange={handleInputChange}
-                className="w-full border border-gray-300 rounded-md p-2"
-                required
-              />
-            </div>
-          </div>
-
-          {/* Vehicle Selection */}
-          <div>
-            <label className="block text-sm font-medium mb-1">Vehicle Type</label>
-            <select
-              name="vehicleType"
-              value={formData.vehicleType}
-              onChange={handleInputChange}
-              className="w-full border border-gray-300 rounded-md p-2"
-              required
-            >
-              <option value="">Select Vehicle</option>
-              {suggestedVehicles.map(vehicle => (
-                <option key={vehicle.id} value={vehicle.type}>
-                  {vehicle.type} ({vehicle.capacity})
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="flex justify-end pt-4">
-            <button
-              type="submit"
-              className="bg-[#b82025] text-white px-6 py-2 rounded-md hover:bg-[#9a1a1f]"
-            >
-              Get Quote
-            </button>
-          </div>
-        </form>
       </div>
-    </div>
-  </FormLayout>);
+    </FormLayout>
+  );
 }

@@ -19,10 +19,10 @@ export default function FormRadio() {
     // Navigation based on selection
     const routes = {
       'one-way': '/one-way',
-      'city-disposal': '/city-disposal',
+      'city-disposal': '/hourly-disposal',
       'multi-day': '/multi-day',
-      'day-excursions': '/day-excursions',
-      'day-excursions-disposal': '/day-excursions-disposal'
+      'day-excursions': '/day-excursion',
+      'day-excursions-disposal': '/day-excursion-disposal'
     };
     
     router.push(routes[selectedOption]);

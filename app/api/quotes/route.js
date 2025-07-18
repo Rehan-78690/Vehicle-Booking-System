@@ -1,9 +1,7 @@
 // app/api/quotes/route.js
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import { calculateQuote } from '@/lib/quoteLogic';
 import { validateQuoteRequest } from '@/lib/validation';
-
 
 export async function GET() {
   try {
@@ -15,13 +13,12 @@ export async function GET() {
     return NextResponse.json({ error: 'Failed to fetch quotes' }, { status: 500 });
   }
 }
+
 export async function POST(req) {
   try {
-    /* ---------- 1. read the body ONCE ---------- */
-    const body = await req.json();       // <-- only call json() here
-    const { use_case_type, form_data } = body;
+    const body = await req.json();
+    const { use_case_type, form_data, price, vehicleType, distance, hours, bookingDays } = body;
 
-    /* ---------- 2. validate input BEFORE work ---------- */
     const validation = validateQuoteRequest(body);
     if (!validation.valid) {
       return NextResponse.json(
@@ -30,22 +27,20 @@ export async function POST(req) {
       );
     }
 
-    /* ---------- 3. run quotation ---------- */
-     const priceDetails = await calculateQuote(use_case_type, form_data);
-
-    /* ---------- 4. persist & respond ---------- */
     const saved = await prisma.quote.create({
       data: {
         useCase: use_case_type,
         formData: JSON.stringify(form_data),
-        price: priceDetails.total_price,
-        vehicleType: form_data.vehicle_type,
-        distance: form_data.distance ?? 0,
+        price: parseFloat(price), // Ensure Float
+        vehicleType: vehicleType,
+        distance: parseFloat(distance), // Ensure Float
+        hours: hours ? parseInt(hours) : null, // Ensure Int or null
+        bookingDays: bookingDays ? parseInt(bookingDays) : 0, // Ensure Int
       },
     });
 
     return NextResponse.json(
-      { id: saved.id,   price: priceDetails, vehicle: form_data.vehicle_type },
+      { id: saved.id, price: saved.price, vehicle: saved.vehicleType },
       { status: 200 }
     );
   } catch (err) {
