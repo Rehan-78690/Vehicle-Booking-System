@@ -28,14 +28,14 @@ export default function QuotesPage() {
         const form = JSON.parse(quote.formData || '{}');
         return {
           id: `Q${(i + 1).toString().padStart(3, '0')}`,
-          customerName: form.name || 'Unknown',
-          customerEmail: form.email || '',
-          customerPhone: form.phone || '',
+          // customerName: form.name || 'Unknown',
+          // customerEmail: form.email || '',
+          // customerPhone: form.phone || '',
           serviceType: quote.useCase || '',
           fromLocation: form.pickup_location || '—',
           toLocation: form.dropoff_location || '—',
           vehicleType: quote.vehicleType || '',
-          passengers: form.passengers || 0,
+         passengers: parseInt(form.travelers || '0'),
           luggage: form.luggage || 0,
           distance: form.distance || 0,
           amount: quote.price || 0,
@@ -69,8 +69,8 @@ export default function QuotesPage() {
 
     if (filters.searchTerm) {
       filtered = filtered.filter(quote => 
-        quote.customerName.toLowerCase().includes(filters.searchTerm.toLowerCase()) ||
-        quote.customerEmail.toLowerCase().includes(filters.searchTerm.toLowerCase()) ||
+        // quote.customerName.toLowerCase().includes(filters.searchTerm.toLowerCase()) ||
+        // quote.customerEmail.toLowerCase().includes(filters.searchTerm.toLowerCase()) ||
         quote.id.toLowerCase().includes(filters.searchTerm.toLowerCase())
       );
     }
@@ -108,14 +108,14 @@ export default function QuotesPage() {
   };
 
   const exportToCSV = () => {
-    const headers = ['Quote ID', 'Customer Name', 'Email', 'Phone', 'Service Type', 'From', 'To', 'Vehicle', 'Amount', 'Status', 'Created At'];
+    const headers = ['Quote ID',  'Service Type', 'From', 'To', 'Vehicle', 'Amount', 'Status', 'Created At'];
     const csvContent = [
       headers.join(','),
       ...filteredQuotes.map(quote => [
         quote.id,
-        quote.customerName,
-        quote.customerEmail,
-        quote.customerPhone,
+        // quote.customerName,
+        // quote.customerEmail,
+        // quote.customerPhone,
         quote.serviceType,
         quote.fromLocation,
         quote.toLocation,
@@ -293,9 +293,9 @@ export default function QuotesPage() {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Quote Details
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Customer
-                </th>
+                </th> */}
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Service
                 </th>
@@ -322,13 +322,13 @@ export default function QuotesPage() {
                       <div className="text-sm text-gray-500">{formatDate(quote.createdAt)}</div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  {/* <td className="px-6 py-4 whitespace-nowrap">
                     <div>
                       <div className="text-sm font-medium text-gray-900">{quote.customerName}</div>
                       <div className="text-sm text-gray-500">{quote.customerEmail}</div>
                       <div className="text-sm text-gray-500">{quote.customerPhone}</div>
                     </div>
-                  </td>
+                  </td> */}
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div>
                       <div className="text-sm font-medium text-gray-900">{quote.serviceType}</div>
