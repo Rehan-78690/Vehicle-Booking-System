@@ -149,7 +149,7 @@ export default function IntercityTransferForm({ onSubmit }) {
   };
 
   return (
-    <FormLayout>
+ 
       <div className="min-h-screen bg-gray-50 ">
         <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-md overflow-hidden">
           {/* Header with Back Button */}
@@ -287,6 +287,6 @@ export default function IntercityTransferForm({ onSubmit }) {
           </form>
         </div>
       </div>
-    </FormLayout>
+   
   );
 }
