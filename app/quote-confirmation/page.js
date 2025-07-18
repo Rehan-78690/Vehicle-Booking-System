@@ -1,14 +1,7 @@
-import dynamic from 'next/dynamic';
-import { Suspense } from 'react';
+'use client';
 
-const QuoteConfirmation = dynamic(() => import('@/components/QuoteConfirmation'), {
-  ssr: false, // disables SSR to prevent crash
-});
+import QuoteConfirmation from '@/components/QuoteConfirmation';
 
-export default function Page() {
-  return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <QuoteConfirmation />
-    </Suspense>
-  );
+export default function QuoteConfirmationPage() {
+  return <QuoteConfirmation />;
 }
