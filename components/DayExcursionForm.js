@@ -3,9 +3,6 @@
 import FormLayout from './FormLayout';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { calculateDistance } from '../lib/googleMaps';
-
-// ... (europeanCities and vehicleOptions arrays remain the same) ...
 
 const europeanCities = {
   'Paris, France': {},
@@ -89,30 +86,25 @@ const europeanCities = {
 };
 
 const vehicleOptions = [
-  // Sedans
   { id: 1, type: 'Standard Sedan', category: 'Sedan', capacity: '1-2 passengers, 2 suitcases', maxPassengers: 2, maxLuggage: 2 },
   { id: 2, type: 'Premium Sedan (Mercedes E-Class/BMW/Audi)', category: 'Sedan', capacity: '1-2 passengers, 2 suitcases', maxPassengers: 2, maxLuggage: 2 },
-  // Minivans
   { id: 3, type: 'Standard Minivan (8-seater)', category: 'Minivan', capacity: '1-7 passengers, 6 suitcases', maxPassengers: 7, maxLuggage: 6 },
   { id: 4, type: 'Premium Minivan (8-seater Mercedes)', category: 'Minivan', capacity: '1-7 passengers, 6 suitcases', maxPassengers: 7, maxLuggage: 6 },
   { id: 5, type: 'Standard Minivan (9-seater)', category: 'Minivan', capacity: '1-8 passengers, 6 suitcases', maxPassengers: 8, maxLuggage: 6 },
   { id: 6, type: 'Mercedes Minivan (9-seater)', category: 'Minivan', capacity: '1-8 passengers, 6 suitcases', maxPassengers: 8, maxLuggage: 6 },
-  // Sprinters
   { id: 7, type: 'Mercedes Sprinter (9-Seater)', category: 'Sprinter', capacity: '8 passengers, 10 suitcases', maxPassengers: 8, maxLuggage: 10 },
   { id: 8, type: 'Mercedes Sprinter (12-Seater)', category: 'Sprinter', capacity: '11 passengers, 12 suitcases', maxPassengers: 11, maxLuggage: 12 },
   { id: 9, type: 'Mercedes Sprinter (16-Seater)', category: 'Sprinter', capacity: '15 passengers, 14 suitcases', maxPassengers: 15, maxLuggage: 14 },
   { id: 10, type: 'Mercedes Sprinter (19-Seater)', category: 'Sprinter', capacity: '18 passengers, 15 suitcases', maxPassengers: 18, maxLuggage: 15 },
-  // Buses
   { id: 11, type: '30-Seater Bus', category: 'Bus', capacity: '29 passengers, 25 suitcases', maxPassengers: 29, maxLuggage: 25 },
   { id: 12, type: '50-Seater Bus', category: 'Bus', capacity: '49 passengers, 45 suitcases', maxPassengers: 49, maxLuggage: 45 },
   { id: 13, type: '54-Seater Bus', category: 'Bus', capacity: '53 passengers, 50 suitcases', maxPassengers: 53, maxLuggage: 50 },
   { id: 14, type: '57-Seater Bus', category: 'Bus', capacity: '56 passengers, 55 suitcases', maxPassengers: 56, maxLuggage: 55 },
   { id: 15, type: '60-Seater Bus', category: 'Bus', capacity: '59 passengers, 58 suitcases', maxPassengers: 59, maxLuggage: 58 },
-  { id: 16, type: '77-Seater (Double-Decker)', category: 'Bus', capacity: '76 passengers, 60 suitcases', maxPassengers: 76, maxLuggage: 60 }
+  { id: 16, type: '77-Seater (Double-Decker)', category: 'Bus', capacity: '76 passengers, 60 suitcases', maxPassengers: 76, maxLuggage: 60 },
 ];
 
-
-export default function DayExcursionForm({ onSubmit }) {
+export default function DayExcursionForm({ onPriceCalculated, onSubmit }) {
   const [formData, setFormData] = useState({
     city: '',
     date: '',
@@ -120,231 +112,203 @@ export default function DayExcursionForm({ onSubmit }) {
     hours: 4,
     travelers: 1,
     visitedCity: '',
-    distance: 0,
-    vehicleType: ''
+    distance: 0, // Temporary manual input field (to be replaced with Google Maps API later)
+    vehicleType: '',
   });
 
   const [suggestedVehicles, setSuggestedVehicles] = useState([]);
-  const [distanceLoading, setDistanceLoading] = useState(false);
-  const [distanceError, setDistanceError] = useState(null);
+  const [price, setPrice] = useState(null);
+  const [error, setError] = useState(null);
 
-  // Update suggested vehicles when travelers change
   useEffect(() => {
     const filtered = vehicleOptions.filter(
-      vehicle => vehicle.maxPassengers >= formData.travelers
+      (vehicle) => vehicle.maxPassengers >= formData.travelers
     );
     setSuggestedVehicles(filtered);
 
-    if (filtered.length > 0 && !filtered.some(v => v.type === formData.vehicleType)) {
-      setFormData(prev => ({ ...prev, vehicleType: filtered[0].type }));
+    if (filtered.length > 0 && !filtered.some((v) => v.type === formData.vehicleType)) {
+      setFormData((prev) => ({ ...prev, vehicleType: filtered[0].type }));
     }
   }, [formData.travelers, formData.vehicleType]);
 
-  // Calculate distance when cities change (debounced)
-  useEffect(() => {
-    const calculate = async () => {
-      if (formData.city && formData.visitedCity) {
-        setDistanceLoading(true);
-        setDistanceError(null);
-
-        try {
-          const distance = await calculateDistance(formData.city, formData.visitedCity);
-          setFormData(prev => ({ ...prev, distance }));
-        } catch (error) {
-          setDistanceError('Failed to calculate distance. Please check city names.');
-          console.error(error);
-          setFormData(prev => ({ ...prev, distance: 0 }));
-        } finally {
-          setDistanceLoading(false);
-        }
-      }
-    };
-
-    const timer = setTimeout(calculate, 500);
-    return () => clearTimeout(timer);
-  }, [formData.city, formData.visitedCity]);
-
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
-    // Basic validation
-    if (!formData.city || !formData.visitedCity || !formData.vehicleType) {
-      alert('Please fill all required fields');
+    console.log('Form data before submission:', formData); // Debug log
+    if (!formData.vehicleType || !formData.distance || !formData.hours) {
+      setError('Please fill all required fields (vehicle, distance, hours)');
       return;
     }
-    
-    onSubmit(formData);
+    if (onSubmit) onSubmit(formData); // Pass form data to parent
   };
 
-  // Get today's date in YYYY-MM-DD format for min date
   const today = new Date().toISOString().split('T')[0];
 
-return (
-  <FormLayout>
-    <div className="min-h-screen bg-gray-50 ">
-      <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-md overflow-hidden">
-        {/* Header with Back Button */}
-        <div className="bg-[#27368c] p-6 text-white relative">
-          <Link href="/quotation" className="absolute left-6 top-6 text-white hover:text-gray-200">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
-          </Link>
-          <h1 className="text-2xl font-bold text-center">Day Excursion</h1>
+  return (
+    <FormLayout>
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-md overflow-hidden">
+          <div className="bg-[#27368c] p-6 text-white relative">
+            <Link href="/quotation" className="absolute left-6 top-6 text-white hover:text-gray-200">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                />
+              </svg>
+            </Link>
+            <h1 className="text-2xl font-bold text-center">Day Excursion</h1>
+          </div>
+
+          <form onSubmit={handleSubmit} className="p-6 space-y-6">
+            <div>
+              <label className="block text-sm font-medium mb-1 text-gray-700">City of Service *</label>
+              <select
+                name="city"
+                value={formData.city}
+                onChange={handleInputChange}
+                className="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                required
+              >
+                <option value="">Select City</option>
+                {Object.keys(europeanCities).map((city) => (
+                  <option key={city} value={city}>
+                    {city}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-1 text-gray-700">Date of Service *</label>
+                <input
+                  type="date"
+                  name="date"
+                  value={formData.date}
+                  onChange={handleInputChange}
+                  min={today}
+                  className="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1 text-gray-700">Pickup Time *</label>
+                <input
+                  type="time"
+                  name="pickupTime"
+                  value={formData.pickupTime}
+                  onChange={handleInputChange}
+                  className="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-1 text-gray-700">Total Duration (Hours) *</label>
+                <input
+                  type="number"
+                  name="hours"
+                  min="1"
+                  max="16"
+                  value={formData.hours}
+                  onChange={handleInputChange}
+                  className="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  required
+                />
+                <p className="text-xs text-gray-500 mt-1">Minimum 4 hours, maximum 16 hours</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1 text-gray-700">Number of Travelers *</label>
+                <input
+                  type="number"
+                  name="travelers"
+                  min="1"
+                  max="100"
+                  value={formData.travelers}
+                  onChange={handleInputChange}
+                  className="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  required
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1 text-gray-700">Visited City / Main Destination *</label>
+              <input
+                type="text"
+                name="visitedCity"
+                value={formData.visitedCity}
+                onChange={handleInputChange}
+                className="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Enter destination city"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1 text-gray-700">
+                Distance (KM) * {/* Temporary field; will be calculated automatically with Google Maps API */}
+              </label>
+              <input
+                type="number"
+                name="distance"
+                value={formData.distance}
+                onChange={handleInputChange}
+                min="0"
+                step="0.1"
+                className="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                required
+                placeholder="Enter distance in kilometers"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1 text-gray-700">Vehicle Type *</label>
+              <select
+                name="vehicleType"
+                value={formData.vehicleType}
+                onChange={handleInputChange}
+                className="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                required
+              >
+                <option value="">Select Vehicle</option>
+                {suggestedVehicles.map((vehicle) => (
+                  <option key={vehicle.id} value={vehicle.type}>
+                    {vehicle.type} ({vehicle.capacity})
+                  </option>
+                ))}
+              </select>
+              <p className="text-xs text-gray-500 mt-1">Vehicles filtered based on number of travelers</p>
+            </div>
+
+            <div className="flex justify-end pt-4">
+              <button
+                type="submit"
+                className="bg-[#b82025] text-white px-6 py-3 rounded-md hover:bg-[#9a1a1f] transition-colors font-medium shadow-md hover:shadow-lg"
+              >
+                Get Quote
+              </button>
+            </div>
+            {error && <p style={{ color: 'red' }}>{error}</p>}
+            {price && <p>Total Price: ${price}</p>}
+          </form>
         </div>
-
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          {/* City of Service */}
-          <div>
-            <label className="block text-sm font-medium mb-1 text-gray-700">
-              City of Service *
-            </label>
-            <select
-              name="city"
-              value={formData.city}
-              onChange={handleInputChange}
-              className="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              required
-            >
-              <option value="">Select City</option>
-              {Object.keys(europeanCities).map(city => (
-                <option key={city} value={city}>{city}</option>
-              ))}
-            </select>
-          </div>
-
-          {/* Date and Time */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium mb-1 text-gray-700">
-                Date of Service *
-              </label>
-              <input
-                type="date"
-                name="date"
-                value={formData.date}
-                onChange={handleInputChange}
-                min={today}
-                className="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1 text-gray-700">
-                Pickup Time *
-              </label>
-              <input
-                type="time"
-                name="pickupTime"
-                value={formData.pickupTime}
-                onChange={handleInputChange}
-                className="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                required
-              />
-            </div>
-          </div>
-
-          {/* Duration and Travelers */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium mb-1 text-gray-700">
-                Total Duration (Hours) *
-              </label>
-              <input
-                type="number"
-                name="hours"
-                min="1"
-                max="16"
-                value={formData.hours}
-                onChange={handleInputChange}
-                className="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                required
-              />
-              <p className="text-xs text-gray-500 mt-1">Minimum 4 hours, maximum 16 hours</p>
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1 text-gray-700">
-                Number of Travelers *
-              </label>
-              <input
-                type="number"
-                name="travelers"
-                min="1"
-                max="100"
-                value={formData.travelers}
-                onChange={handleInputChange}
-                className="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                required
-              />
-            </div>
-          </div>
-
-          {/* Visited City */}
-          <div>
-            <label className="block text-sm font-medium mb-1 text-gray-700">
-              Visited City / Main Destination *
-            </label>
-            <input
-              type="text"
-              name="visitedCity"
-              value={formData.visitedCity}
-              onChange={handleInputChange}
-              className="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Enter destination city"
-              required
-            />
-
-            {/* Distance Display */}
-            <div className="mt-2 text-sm min-h-[24px]">
-              {distanceLoading ? (
-                <span className="text-blue-600">Calculating distance...</span>
-              ) : distanceError ? (
-                <span className="text-red-500">{distanceError}</span>
-              ) : formData.distance > 0 ? (
-                <span className="text-green-600 font-medium">Distance: {formData.distance.toFixed(2)} KM</span>
-              ) : null}
-            </div>
-          </div>
-
-          {/* Vehicle Selection */}
-          <div>
-            <label className="block text-sm font-medium mb-1 text-gray-700">
-              Vehicle Type *
-            </label>
-            <select
-              name="vehicleType"
-              value={formData.vehicleType}
-              onChange={handleInputChange}
-              className="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              required
-            >
-              <option value="">Select Vehicle</option>
-              {suggestedVehicles.map(vehicle => (
-                <option key={vehicle.id} value={vehicle.type}>
-                  {vehicle.type} ({vehicle.capacity})
-                </option>
-              ))}
-            </select>
-            <p className="text-xs text-gray-500 mt-1">
-              Vehicles filtered based on number of travelers
-            </p>
-          </div>
-
-          <div className="flex justify-end pt-4">
-            <button
-              type="submit"
-              className="bg-[#b82025] text-white px-6 py-3 rounded-md hover:bg-[#9a1a1f] transition-colors font-medium shadow-md hover:shadow-lg"
-            >
-              Get Quote
-            </button>
-          </div>
-        </form>
       </div>
-    </div>
-   </FormLayout>);
-}    
+    </FormLayout>
+  );
+}

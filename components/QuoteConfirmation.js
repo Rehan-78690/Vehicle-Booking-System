@@ -2,22 +2,29 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { jsPDF } from 'jspdf';
 import Link from 'next/link';
 import FormLayout from './FormLayout';
 
 export default function QuoteConfirmation() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [quote, setQuote] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Fetch the latest quote from your API
+    const quoteId = searchParams.get('quoteId');
+    if (!quoteId) {
+      setLoading(false);
+      return;
+    }
+
     const fetchQuote = async () => {
       try {
-        const response = await fetch('/api/quotes');
+        const response = await fetch(`/api/quotes/${quoteId}`);
         const data = await response.json();
+        if (data.error) throw new Error(data.error);
         setQuote(data);
       } catch (error) {
         console.error('Error fetching quote:', error);
@@ -27,79 +34,72 @@ export default function QuoteConfirmation() {
     };
 
     fetchQuote();
-  }, []);
+  }, [searchParams]);
 
   const generatePDF = () => {
     if (!quote) return;
 
     const doc = new jsPDF();
-    
+
     // Add logo
     doc.addImage('/Logo.png', 'PNG', 15, 10, 30, 30);
-    
+
     // Title
     doc.setFontSize(20);
     doc.setTextColor(39, 54, 140); // #27368c
     doc.text('TRANSPORT QUOTATION', 105, 20, { align: 'center' });
-    
-    // Quote details
+
+    // Quote Reference
     doc.setFontSize(12);
     doc.setTextColor(0, 0, 0); // Black
-    
-    // Service Type
-    doc.setFont(undefined, 'bold');
-    doc.text('Service Type:', 15, 50);
-    doc.setFont(undefined, 'normal');
-    doc.text(quote.useCase, 50, 50);
-    
-    // Vehicle Details
-    doc.setFont(undefined, 'bold');
-    doc.text('Vehicle:', 15, 60);
-    doc.setFont(undefined, 'normal');
-    doc.text(quote.vehicleType, 50, 60);
-    
-    // Price
-    doc.setFont(undefined, 'bold');
-    doc.text('Total Price:', 15, 70);
-    doc.setFont(undefined, 'normal');
-   doc.text(`€${typeof quote.price === 'number' ? quote.price.toFixed(2) : 'N/A'}`, 50, 70);
+    doc.text(`Reference #QT-${quote.id.toString().padStart(5, '0')}`, 15, 30);
 
-    
-    // Date
-    doc.setFont(undefined, 'bold');
-    doc.text('Date:', 15, 80);
-    doc.setFont(undefined, 'normal');
-    doc.text(new Date(quote.createdAt).toLocaleDateString(), 50, 80);
-    
-    // Form Data
-    doc.setFont(undefined, 'bold');
-    doc.text('Details:', 15, 90);
-    doc.setFont(undefined, 'normal');
-    
-    let yPosition = 100;
-    let formData = {};
-try {
-  formData = typeof quote.formData === 'string' ? JSON.parse(quote.formData) : quote.formData || {};
-} catch (err) {
-  console.error('Invalid formData in quote:', quote.formData);
-  formData = {};
-}
-
-    
-    Object.entries(formData).forEach(([key, value]) => {
-      if (value && typeof value === 'string') {
-        doc.text(`${key}: ${value}`, 20, yPosition);
-        yPosition += 10;
-      }
+    // Core Quote Details
+    let yPosition = 40;
+    const coreDetails = [
+      { label: 'Service Type', value: quote.useCase },
+      { label: 'Vehicle', value: quote.vehicleType },
+      { label: 'Total Price', value: `€${typeof quote.price === 'number' ? quote.price.toFixed(2) : 'N/A'}` },
+      { label: 'Quote ID', value: quote.id },
+      { label: 'Date Created', value: new Date(quote.createdAt).toLocaleDateString() },
+    ];
+    coreDetails.forEach(({ label, value }) => {
+      doc.setFont(undefined, 'bold');
+      doc.text(`${label}:`, 15, yPosition);
+      doc.setFont(undefined, 'normal');
+      doc.text(value.toString(), 50, yPosition);
+      yPosition += 10;
     });
-    
+
+    // Form Data
+    let formData = {};
+    try {
+      formData = typeof quote.formData === 'string' ? JSON.parse(quote.formData) : quote.formData || {};
+    } catch (err) {
+      console.error('Invalid formData in quote:', quote.formData);
+      formData = {};
+    }
+
+    if (Object.keys(formData).length > 0) {
+      doc.setFont(undefined, 'bold');
+      doc.text('Additional Details:', 15, yPosition);
+      yPosition += 10;
+      doc.setFont(undefined, 'normal');
+      Object.entries(formData).forEach(([key, value]) => {
+        if (value !== null && value !== undefined) {
+          const displayValue = Array.isArray(value) ? value.filter(v => v).join(', ') : value.toString();
+          doc.text(`${key}: ${displayValue}`, 20, yPosition);
+          yPosition += 10;
+        }
+      });
+    }
+
     // Footer
     doc.setFontSize(10);
     doc.setTextColor(100, 100, 100);
     doc.text('Thank you for choosing our services!', 105, 280, { align: 'center' });
-    
-    // Save the PDF
-    doc.save(`quote_${quote.id}.pdf`);
+
+    doc.save(`quote_QT-${quote.id.toString().padStart(5, '0')}.pdf`);
   };
 
   if (loading) {
@@ -124,7 +124,7 @@ try {
       <FormLayout>
         <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-md p-6 text-center">
           <h2 className="text-xl font-bold text-[#b82025] mb-4">No Quote Found</h2>
-          <p className="mb-4">We couldn t find your quote details.</p>
+          <p className="mb-4">We couldn’t find your quote details.</p>
           <Link href="/quotation" className="text-[#27368c] hover:underline">
             Return to quotation form
           </Link>
@@ -134,13 +134,12 @@ try {
   }
 
   let formData = {};
-try {
-  formData = typeof quote.formData === 'string' ? JSON.parse(quote.formData) : quote.formData || {};
-} catch (err) {
-  console.error('Invalid formData in quote:', quote.formData);
-  formData = {};
-}
-
+  try {
+    formData = typeof quote.formData === 'string' ? JSON.parse(quote.formData) : quote.formData || {};
+  } catch (err) {
+    console.error('Invalid formData in quote:', quote.formData);
+    formData = {};
+  }
 
   return (
     <FormLayout>
@@ -148,17 +147,16 @@ try {
         {/* Confirmation Header */}
         <div className="bg-[#27368c] p-6 text-white">
           <h1 className="text-2xl font-bold text-center">Your Transport Quote</h1>
-         <p className="text-center opacity-90 mt-1">
-  Reference #QT-{quote?.id?.toString()?.padStart(5, '0') || '00000'}
-</p>
-
+          <p className="text-center opacity-90 mt-1">
+            Reference #QT-{quote.id.toString().padStart(5, '0')}
+          </p>
         </div>
 
         {/* Quote Details */}
         <div className="p-6 space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <h3 className="text-lg font-medium text-[#27368c] mb-4">Service Details</h3>
+              <h3 className="text-lg font-medium text-[#27368c] mb-4">Core Details</h3>
               <div className="space-y-3">
                 <div className="flex justify-between border-b pb-2">
                   <span className="font-medium">Service Type:</span>
@@ -172,23 +170,13 @@ try {
                   <span className="font-medium">Distance:</span>
                   <span>{quote.distance} KM</span>
                 </div>
-              </div>
-            </div>
-
-            <div>
-              <h3 className="text-lg font-medium text-[#27368c] mb-4">Booking Details</h3>
-              <div className="space-y-3">
+                <div className="flex justify-between border-b pb-2">
+                  <span className="font-medium">Quote ID:</span>
+                  <span>{quote.id}</span>
+                </div>
                 <div className="flex justify-between border-b pb-2">
                   <span className="font-medium">Date Created:</span>
                   <span>{new Date(quote.createdAt).toLocaleDateString()}</span>
-                </div>
-                <div className="flex justify-between border-b pb-2">
-                  <span className="font-medium">Passengers:</span>
-                  <span>{formData.travelers || formData.people || '-'}</span>
-                </div>
-                <div className="flex justify-between border-b pb-2">
-                  <span className="font-medium">Luggage:</span>
-                  <span>{formData.luggage || formData.suitcases || '-'}</span>
                 </div>
               </div>
             </div>
@@ -196,142 +184,17 @@ try {
 
           {/* Form-specific details */}
           <div className="border-t pt-6">
-            <h3 className="text-lg font-medium text-[#27368c] mb-4">Journey Details</h3>
-            {quote.useCase === 'One-Way Transfer' && (
-              <div className="space-y-3">
-                <div className="flex justify-between border-b pb-2">
-                  <span className="font-medium">Pickup Location:</span>
-                  <span>{formData.pickupPoint || formData.customPickup}</span>
+            <h3 className="text-lg font-medium text-[#27368c] mb-4">Additional Details</h3>
+            <div className="space-y-3">
+              {Object.entries(formData).map(([key, value]) => (
+                <div key={key} className="flex justify-between border-b pb-2">
+                  <span className="font-medium capitalize">{key.replace(/_/g, ' ')}:</span>
+                  <span>
+                    {Array.isArray(value) ? value.filter(v => v).join(', ') : value?.toString() || '-'}
+                  </span>
                 </div>
-                <div className="flex justify-between border-b pb-2">
-                  <span className="font-medium">Drop-off Location:</span>
-                  <span>{formData.dropoffPoint || formData.customDropoff}</span>
-                </div>
-                <div className="flex justify-between border-b pb-2">
-                  <span className="font-medium">Date:</span>
-                  <span>{formData.pickupDate}</span>
-                </div>
-                <div className="flex justify-between border-b pb-2">
-                  <span className="font-medium">Time:</span>
-                  <span>{formData.pickupTime}</span>
-                </div>
-              </div>
-            )}
-
-            {quote.useCase === 'Hourly Disposal' && (
-              <div className="space-y-3">
-                <div className="flex justify-between border-b pb-2">
-                  <span className="font-medium">City:</span>
-                  <span>{formData.city}</span>
-                </div>
-                <div className="flex justify-between border-b pb-2">
-                  <span className="font-medium">Hours:</span>
-                  <span>{formData.hours}</span>
-                </div>
-              </div>
-            )}
-            {quote.useCase === 'Intercity Transfer with Disposal' && (
-  <div className="space-y-3">
-    <div className="flex justify-between border-b pb-2">
-      <span className="font-medium">Pickup City:</span>
-      <span>{formData.pickupCity}</span>
-    </div>
-    <div className="flex justify-between border-b pb-2">
-      <span className="font-medium">Dropping City:</span>
-      <span>{formData.dropoffCity}</span>
-    </div>
-    <div className="flex justify-between border-b pb-2">
-      <span className="font-medium">Date:</span>
-      <span>{formData.date}</span>
-    </div>
-    <div className="flex justify-between border-b pb-2">
-      <span className="font-medium">Hours:</span>
-      <span>{formData.hours}</span>
-    </div>
-  </div>
-)}
-
-{quote.useCase === 'Multi-City Multi-Day Disposal' && (
-  <div className="space-y-4">
-    <h4 className="font-medium text-[#27368c]">Itinerary</h4>
-    {formData.itinerary?.map((day, index) => (
-      <div key={index} className="border rounded-lg p-3">
-        <div className="flex justify-between font-medium">
-          <span>Day {day.dayNumber}</span>
-          <span>{day.date}</span>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">
-          <div>
-            <span className="text-sm text-gray-600">Overnight City:</span>
-            <p>{day.city}</p>
-          </div>
-          <div>
-            <span className="text-sm text-gray-600">Service Type:</span>
-            <p>{day.serviceType}</p>
-          </div>
-        </div>
-      </div>
-    ))}
-    <div className="flex justify-between border-b pb-2">
-      <span className="font-medium">Pickup Location:</span>
-      <span>{formData.pickupLocation}</span>
-    </div>
-    <div className="flex justify-between border-b pb-2">
-      <span className="font-medium">Final Drop-off:</span>
-      <span>{formData.dropoffLocation}</span>
-    </div>
-  </div>
-)}
-
-{quote.useCase === 'Day Excursion' && (
-  <div className="space-y-3">
-    <div className="flex justify-between border-b pb-2">
-      <span className="font-medium">City of Service:</span>
-      <span>{formData.city}</span>
-    </div>
-    <div className="flex justify-between border-b pb-2">
-      <span className="font-medium">Date:</span>
-      <span>{formData.date}</span>
-    </div>
-    <div className="flex justify-between border-b pb-2">
-      <span className="font-medium">Pickup Time:</span>
-      <span>{formData.pickupTime}</span>
-    </div>
-    <div className="flex justify-between border-b pb-2">
-      <span className="font-medium">Duration:</span>
-      <span>{formData.hours} hours</span>
-    </div>
-    <div className="flex justify-between border-b pb-2">
-      <span className="font-medium">Cities Visited:</span>
-      <span>
-        {formData.visitedCities?.filter(c => c).join(', ') || '-'}
-      </span>
-    </div>
-    <div className="flex justify-between border-b pb-2">
-      <span className="font-medium">Distance:</span>
-      <span>{formData.distance} KM</span>
-    </div>
-  </div>
-)}
-
-{quote.useCase === 'Hourly Disposal' && (
-  <div className="space-y-3">
-    <div className="flex justify-between border-b pb-2">
-      <span className="font-medium">City:</span>
-      <span>{formData.city}</span>
-    </div>
-    <div className="flex justify-between border-b pb-2">
-      <span className="font-medium">Date:</span>
-      <span>{formData.date}</span>
-    </div>
-    <div className="flex justify-between border-b pb-2">
-      <span className="font-medium">Hours:</span>
-      <span>{formData.hours}</span>
-    </div>
-  </div>
-)}
-
-           
+              ))}
+            </div>
           </div>
 
           {/* Price Summary */}
@@ -342,9 +205,8 @@ try {
                 <p className="text-sm text-gray-600">Inclusive of all taxes</p>
               </div>
               <div className="text-2xl font-bold text-[#b82025]">
-  €{typeof quote.price === 'number' ? quote.price.toFixed(2) : 'N/A'}
-</div>
-
+                €{typeof quote.price === 'number' ? quote.price.toFixed(2) : 'N/A'}
+              </div>
             </div>
           </div>
 
