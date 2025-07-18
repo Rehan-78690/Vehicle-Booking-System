@@ -2,6 +2,52 @@
 
 import { useState, useEffect } from 'react';
 
+// Helper to map API rules to UI structure
+const mapApiToUi = (apiRules) => {
+  // Find admin configuration rules
+  const adminRules = apiRules.filter(rule => rule.vehicleType === 'admin_config');
+  
+  // Create UI structure from API rules
+  return {
+    baseMarkup: adminRules.find(r => r.destinationCategory === 'baseMarkup')?.adjustment || 15,
+    peakHourMarkup: adminRules.find(r => r.destinationCategory === 'peakHourMarkup')?.adjustment || 25,
+    weekendMarkup: adminRules.find(r => r.destinationCategory === 'weekendMarkup')?.adjustment || 20,
+    distanceTiers: JSON.parse(adminRules.find(r => r.destinationCategory === 'distanceTiers')?.condition || '[]'),
+    timeTiers: JSON.parse(adminRules.find(r => r.destinationCategory === 'timeTiers')?.condition || '[]')
+  };
+};
+
+// Helper to map UI structure to API rules
+const mapUiToApi = (uiRules) => {
+  return [
+    {
+      vehicleType: 'admin_config',
+      destinationCategory: 'baseMarkup',
+      adjustment: uiRules.baseMarkup
+    },
+    {
+      vehicleType: 'admin_config',
+      destinationCategory: 'peakHourMarkup',
+      adjustment: uiRules.peakHourMarkup
+    },
+    {
+      vehicleType: 'admin_config',
+      destinationCategory: 'weekendMarkup',
+      adjustment: uiRules.weekendMarkup
+    },
+    {
+      vehicleType: 'admin_config',
+      destinationCategory: 'distanceTiers',
+      condition: JSON.stringify(uiRules.distanceTiers)
+    },
+    {
+      vehicleType: 'admin_config',
+      destinationCategory: 'timeTiers',
+      condition: JSON.stringify(uiRules.timeTiers)
+    }
+  ];
+};
+
 export default function PricingPage() {
   const [pricingRules, setPricingRules] = useState({
     baseMarkup: 15,
@@ -23,6 +69,7 @@ export default function PricingPage() {
   const [activeTab, setActiveTab] = useState('general');
   const [isEditing, setIsEditing] = useState(false);
   const [tempRules, setTempRules] = useState(pricingRules);
+  const [isLoading, setIsLoading] = useState(true);
 
   const tabs = [
     { id: 'general', name: 'General Pricing', icon: '💰' },
@@ -31,16 +78,69 @@ export default function PricingPage() {
     { id: 'special', name: 'Special Rules', icon: '⭐' }
   ];
 
+  // Fetch pricing rules from API
+  useEffect(() => {
+    const fetchPricingRules = async () => {
+      try {
+        const response = await fetch('/api/pricing');
+        const data = await response.json();
+        
+        if (data && data.length > 0) {
+          const uiRules = mapApiToUi(data);
+          setPricingRules(uiRules);
+          setTempRules(uiRules);
+        }
+      } catch (error) {
+        console.error('Failed to fetch pricing rules:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchPricingRules();
+  }, []);
+
   const handleEdit = () => {
     setIsEditing(true);
     setTempRules({ ...pricingRules });
   };
 
-  const handleSave = () => {
-    setPricingRules(tempRules);
-    setIsEditing(false);
-    // Here you would save to the database
-    console.log('Saving pricing rules:', tempRules);
+  const handleSave = async () => {
+    setIsLoading(true);
+    
+    try {
+      // Convert UI rules to API format
+      const apiRules = mapUiToApi(tempRules);
+      
+      // Update each rule in the backend
+      await Promise.all(apiRules.map(async (rule) => {
+        const response = await fetch('/api/pricing', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            action: 'update',
+            vehicleType: rule.vehicleType,
+            destinationCategory: rule.destinationCategory,
+            adjustment: rule.adjustment,
+            condition: rule.condition
+          })
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to update pricing rule');
+        }
+      }));
+      
+      // Update local state
+      setPricingRules(tempRules);
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Error saving pricing rules:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleCancel = () => {
@@ -78,6 +178,14 @@ export default function PricingPage() {
     }));
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Page Header */}
@@ -92,14 +200,16 @@ export default function PricingPage() {
               <button
                 onClick={handleCancel}
                 className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors duration-200"
+                disabled={isLoading}
               >
                 Cancel
               </button>
               <button
                 onClick={handleSave}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
+                disabled={isLoading}
               >
-                Save Changes
+                {isLoading ? 'Saving...' : 'Save Changes'}
               </button>
             </>
           ) : (
@@ -112,7 +222,6 @@ export default function PricingPage() {
           )}
         </div>
       </div>
-
       {/* Tabs */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200">
         <div className="border-b border-gray-200">
@@ -352,14 +461,16 @@ export default function PricingPage() {
                   <li>• Use distance tiers to encourage longer bookings</li>
                   <li>• Peak hour pricing helps manage demand</li>
                   <li>• Weekend markups account for higher operational costs</li>
-                  <li>• Regular review of pricing ensures competitiveness</li>
+                  <li>• Regular review of pricing ensures competitivenes</li>
                 </ul>
               </div>
             </div>
           )}
         </div>
       </div>
-    </div>
+    
+
+   
+  </div>
   );
 }
-
