@@ -24,11 +24,12 @@ useEffect(() => {
       const quotesData = await quotesRes.json();
 
       const enrichedQuotes = quotesData
+       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
         .map((quote, index) => {
           const form = JSON.parse(quote.formData || '{}');
           return {
             ...quote,
-            customer: form.name || 'Unknown',
+  
             route: `${form.pickup_location || '—'} to ${form.dropoff_location || '—'}`,
             status: quote.status || 'Pending',
           };
@@ -96,7 +97,7 @@ useEffect(() => {
    {quotes.map((quote) => (
   <tr key={quote.id}>
     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-      {quote.customerName || 'Unknown'}
+      {quote.id || 'Unknown'}
     </td>
     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
       {quote.route || `${quote.pickup} to ${quote.dropoff}`}
@@ -182,7 +183,7 @@ useEffect(() => {
               <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Customer
+                  Quote ID
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Route
@@ -199,7 +200,7 @@ useEffect(() => {
               {quotes.map((quote) => (
                   <tr key={quote.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {quote.customer}
+                      {quote.id}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {quote.route}

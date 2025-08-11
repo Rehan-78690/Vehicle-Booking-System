@@ -125,7 +125,7 @@ export default function MultiDayForm({ onSubmit }) {
     dropoffLocation: ''
   });
   const [suggestedVehicles, setSuggestedVehicles] = useState([]);
-
+   const [allVehicles, setAllVehicles] = useState([]);
   // Update dates when start date changes
   useEffect(() => {
     if (startDate) {
@@ -141,17 +141,34 @@ export default function MultiDayForm({ onSubmit }) {
     }
   }, [startDate]);
 
-  // Vehicle suggestion logic
+
+  //fetching vehicles dynamically
   useEffect(() => {
-    const filtered = vehicleOptions.filter(
-      vehicle => vehicle.maxPassengers >= formData.travelers &&
-        vehicle.maxLuggage >= formData.luggage
-    );
-    setSuggestedVehicles(filtered);
-    if (filtered.length > 0 && !formData.vehicleType) {
-      setFormData(prev => ({ ...prev, vehicleType: filtered[0].type }));
+  const fetchVehicles = async () => {
+    try {
+      const res = await fetch('/api/vehicles');
+      if (!res.ok) throw new Error('Failed to fetch vehicles');
+      const data = await res.json();
+      setAllVehicles(data);
+    } catch (error) {
+      console.error('Error fetching vehicles:', error);
     }
-  }, [formData.travelers, formData.luggage]);
+  };
+  fetchVehicles();
+}, []);
+
+
+    // Vehicle suggestion logic
+  useEffect(() => {
+  if (allVehicles.length === 0) return;
+  const filtered = allVehicles.filter(
+    (vehicle) => vehicle.passengerCapacity >= formData.travelers
+  );
+  setSuggestedVehicles(filtered);
+  if (filtered.length > 0 && !formData.vehicleType) {
+    setFormData((prev) => ({ ...prev, vehicleType: filtered[0].type }));
+  }
+}, [formData.travelers, allVehicles]);
 
   const handleDayChange = (index, field, value) => {
     const newDays = [...days];
@@ -196,7 +213,6 @@ export default function MultiDayForm({ onSubmit }) {
   };
 
   return (
-    <FormLayout>
       <div className="min-h-screen bg-gray-50 ">
         <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md overflow-hidden">
           {/* Header with Back Button */}
@@ -321,11 +337,11 @@ export default function MultiDayForm({ onSubmit }) {
                 required
               >
                 <option value="">Select Vehicle</option>
-                {suggestedVehicles.map(vehicle => (
-                  <option key={vehicle.id} value={vehicle.type}>
-                    {vehicle.type} ({vehicle.capacity})
-                  </option>
-                ))}
+              {suggestedVehicles.map(vehicle => (
+  <option key={vehicle.id} value={vehicle.type}>
+    {vehicle.type} - {vehicle.name} ({vehicle.passengerCapacity} pax, {vehicle.suitcaseCapacity} bags)
+  </option>
+))}
               </select>
             </div>
 
@@ -365,6 +381,5 @@ export default function MultiDayForm({ onSubmit }) {
           </form>
         </div>
       </div>
-    </FormLayout>
   );
 }

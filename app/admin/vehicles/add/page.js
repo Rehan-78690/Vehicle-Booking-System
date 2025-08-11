@@ -91,7 +91,13 @@ export default function AddVehiclePage() {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(formData)
+     body: JSON.stringify({
+  name: formData.name,
+  type: formData.type,
+  category: formData.category,
+  capacity: formData.capacity,
+  luggage: formData.luggage
+})
     });
 
     if (!res.ok) {

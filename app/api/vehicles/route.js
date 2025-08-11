@@ -75,10 +75,56 @@ export async function GET() {
     return NextResponse.json({ error: error.message || 'Database error' }, { status: 500 });
   }
 }
+export async function PUT(request) {
+  try {
+    const { id, name, type, passengerCapacity, suitcaseCapacity, category } = await request.json();
+
+    const updatedVehicle = await prisma.vehicles.update({
+      where: { id: Number(id) },
+      data: {
+        name,
+        type,
+        passenger_capacity: passengerCapacity,
+        suitcase_capacity: suitcaseCapacity,
+        category,
+      },
+    });
+
+    // Invalidate cache
+    vehicleCache = null;
+
+    return NextResponse.json(updatedVehicle);
+  } catch (error) {
+    console.error('PUT Error:', error);
+    return NextResponse.json({ error: 'Failed to update vehicle' }, { status: 500 });
+  }
+}
+
 
 export async function POST(request) {
   try {
-    const { passengers, suitcases } = await request.json();
+    const body = await request.json();
+
+    // ✅ If this is a create-vehicle request
+    if (body.name && body.type && body.capacity !== undefined) {
+      const newVehicle = await prisma.vehicles.create({
+        data: {
+          name: body.name,
+          type: body.type,
+          category: body.category || null,
+          passenger_capacity: parseInt(body.capacity),
+          suitcase_capacity: parseInt(body.luggage),
+        },
+      });
+
+      // Invalidate cache
+      vehicleCache = null;
+
+      return NextResponse.json(newVehicle, { status: 201 });
+    }
+
+    // ✅ Otherwise, handle suggestion logic (passengers & suitcases)
+    const { passengers, suitcases } = body;
 
     if (passengers < 1 || suitcases < 0) {
       return NextResponse.json({ error: 'Invalid passenger or suitcase count' }, { status: 400 });
@@ -135,6 +181,7 @@ export async function POST(request) {
     return NextResponse.json({ suggestedVehicle, allowedVehicles: mappedVehicles });
   } catch (error) {
     console.error('POST Error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 });
   }
 }
+
