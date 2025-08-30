@@ -43,7 +43,8 @@ export default function Page() {
         body: JSON.stringify({
           use_case_type: 'multi-day',
           form_data: formData,
-          price: parseFloat(priceResult.totalPrice),
+          calculation_result: priceResult,
+          price: parseFloat(priceResult.totalPrice.totalPrice),
           vehicleType: formData.vehicleType,
           totalDays: totalDays,
           pickupLocation: formData.pickupLocation,

@@ -17,7 +17,16 @@ export async function GET() {
 export async function POST(req) {
   try {
     const body = await req.json();
-    const { use_case_type, form_data, price, vehicleType, distance, hours, bookingDays } = body;
+    const {
+      use_case_type,
+      form_data,
+      calculation_result, // ⬅ NEW
+      price,
+      vehicleType,
+      distance,
+      hours,
+      bookingDays
+    } = body;
 
     const validation = validateQuoteRequest(body);
     if (!validation.valid) {
@@ -30,17 +39,23 @@ export async function POST(req) {
     const saved = await prisma.quote.create({
       data: {
         useCase: use_case_type,
-        formData: JSON.stringify(form_data),
-        price: parseFloat(price), // Ensure Float
-        vehicleType: vehicleType,
-        distance: parseFloat(distance), // Ensure Float
-        hours: hours ? parseInt(hours) : null, // Ensure Int or null
-        bookingDays: bookingDays ? parseInt(bookingDays) : 0, // Ensure Int
+        formData: form_data, // Already JSON
+        calculationResult: calculation_result || null, // Store full breakdown
+        price: Number.isFinite(parseFloat(price)) ? parseFloat(price) : 0, 
+        vehicleType,
+        distance: parseFloat(distance),
+        hours: hours ? parseInt(hours) : null,
+        bookingDays: bookingDays ? parseInt(bookingDays) : 0
       },
     });
 
     return NextResponse.json(
-      { id: saved.id, price: saved.price, vehicle: saved.vehicleType },
+      {
+        id: saved.id,
+        price: saved.price,
+        vehicle: saved.vehicleType,
+        calculationResult: saved.calculationResult // Optional: send back for immediate use
+      },
       { status: 200 }
     );
   } catch (err) {

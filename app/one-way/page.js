@@ -51,7 +51,8 @@ export default function Page() {
         body: JSON.stringify({
           use_case_type: 'one-way',
           form_data: mapped,
-          price: parseFloat(priceResult.totalPrice),
+          calculation_result: priceResult,
+          price: parseFloat(priceResult.totalPrice.totalPrice),
           vehicleType: mapped.vehicleType,
           distance: mapped.distance,
           hours: null,

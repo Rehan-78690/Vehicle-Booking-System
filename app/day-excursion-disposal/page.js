@@ -44,7 +44,8 @@ export default function Page() {
         body: JSON.stringify({
           use_case_type: 'day-excursion-disposal',
           form_data: formData,
-          price: parseFloat(priceResult.totalPrice),
+          calculation_result: priceResult,
+          price: parseFloat(priceResult.totalPrice.totalPrice),
           vehicleType: formData.vehicleType,
           distance: parseFloat(formData.distance),
           hours: parseInt(formData.hours),

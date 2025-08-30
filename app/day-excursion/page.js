@@ -61,7 +61,8 @@ export default function Page() {
         body: JSON.stringify({
           use_case_type: 'day-excursion',
           form_data: formData,
-          price: parseFloat(priceResult.totalPrice), // Ensure Float
+          calculation_result: priceResult,
+          price: parseFloat(priceResult.totalPrice.totalPrice), // Ensure Float
           vehicleType: formData.vehicleType,
           distance: parseFloat(formData.distance), // Ensure Float
           hours: parseInt(formData.hours), // Ensure Int

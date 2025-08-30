@@ -44,7 +44,8 @@ export default function Page() {
         body: JSON.stringify({
           use_case_type: 'hourly-disposal',
           form_data: formData,
-          price: parseFloat(priceResult.totalPrice),
+          calculation_result: priceResult,
+          price: parseFloat(priceResult.totalPrice.totalPrice),
           vehicleType: formData.vehicleType,
           distance: 0, // No distance for hourly disposal
           hours: parseInt(formData.hours),

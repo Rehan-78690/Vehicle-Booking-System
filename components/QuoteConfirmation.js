@@ -177,7 +177,37 @@ export default function QuoteConfirmation() {
               </li>
             </ul>
           </div>
-
+          {/* Price Breakdown */}
+          <div className="bg-gray-50 rounded-lg p-6 mb-6">
+            <h3 className="text-lg font-semibold text-[#27368c] mb-4">Price Breakdown</h3>
+            <ul className="space-y-2">
+              <li className="flex justify-between">
+                <span>Base Price</span>
+                <span>
+                  €{Number(quote.calculationResult.totalPrice?.totalPrice ?? 0).toFixed(2)}
+                </span>
+              </li>
+              <li>
+                <strong>Applied Base Rule:</strong>
+                <pre className="bg-white p-2 rounded text-xs">
+                  {JSON.stringify(quote.calculationResult.totalPrice?.appliedBaseRule, null, 2)}
+                </pre>
+              </li>
+              <li>
+                <strong>Applied Condition Rule:</strong>
+                <pre className="bg-white p-2 rounded text-xs">
+                  {JSON.stringify(quote.calculationResult.totalPrice?.appliedConditionRule, null, 2)}
+                </pre>
+              </li>
+              <li>
+                <strong>Calculation Details:</strong>
+                <pre className="bg-white p-2 rounded text-xs">
+                  {JSON.stringify(quote.calculationResult.totalPrice?.calculationDetails, null, 2)}
+                </pre>
+              </li>
+            </ul>
+          </div>
+          {/* Price Breakdown End here */}
           <div>
             <h2 className="text-xl font-semibold text-[#27368c] mb-4">Additional Info</h2>
             <ul className="space-y-3">
